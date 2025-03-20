@@ -1,0 +1,6 @@
+.tasks-counter::before{
+    content: "Tasks: (";
+}
+.tasks-counter::after{
+    content: ")";
+}
