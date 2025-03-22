@@ -1,6 +1,8 @@
-import { DOMdisplaySpace, DOMdisplayTaskRow } from "./dom-manipulation";
-import { createSpaceObject } from "./spaces";
-import { createTaskObject } from "./todo";
+import editIcon from "./icons/edit.svg";
+import cancelIcon from "./icons/cancel.svg";
+import deleteIcon from "./icons/delete.svg"
+import sidebarIcon from "./icons/sidebar.svg"
+import addIcon from "./icons/add.svg"
 const body = document.querySelector("body");
 
 // navigation
@@ -8,10 +10,12 @@ const nav = document.createElement("nav");
 nav.classList.add("navigation");
 
 const sideBtn = document.createElement("button");
-sideBtn.classList.add("side-btn", "svg");
-sideBtn.textContent="side";
+sideBtn.classList.add("side-btn", "btn", "svg");
 sideBtn.title="Toggle sidebar";
 sideBtn.ariaLabel="Toggle sidebar";
+const sideIcon = document.createElement("img");
+sideIcon.src=sidebarIcon;
+sideBtn.append(sideIcon)
 
 const logoContainer = document.createElement("header");
 logoContainer.classList.add("logo-container");
@@ -60,10 +64,12 @@ const tasksContainer = document.createElement("div");
 tasksContainer.classList.add("tasks-container");
 
 const addTaskBtn = document.createElement("button");
-addTaskBtn.classList.add("add-task", "btn");
+addTaskBtn.classList.add("add-task", "btn", "svg");
 addTaskBtn.ariaLabel="Add New Task";
 addTaskBtn.title = "Add New Task";
-addTaskBtn.textContent="add";
+const addTaskSVG = document.createElement("img");
+addTaskSVG.src = addIcon;
+addTaskBtn.append(addTaskSVG)
 
 todoContainer.append(headerRow, taskRow1, tasksContainer, addTaskBtn)
 
@@ -76,19 +82,87 @@ filteredSpaces.classList.add("space-container")
 const customSpaces = document.createElement("div");
 customSpaces.classList.add("space-container");
 
-const allSpace = createSpaceObject("All", "calendar");
-const todaySpace = createSpaceObject("Today", "calendar2");
-const weekSpace = createSpaceObject("Week", "calendar2");
-const monthSpace = createSpaceObject("Month", "calendar2");
-
-DOMdisplaySpace(allSpace, filteredSpaces);
-DOMdisplaySpace(todaySpace, filteredSpaces);
-DOMdisplaySpace(weekSpace, filteredSpaces);
-DOMdisplaySpace(monthSpace, filteredSpaces);
-
 sidebar.append(filteredSpaces, customSpaces);
-const task = createTaskObject("Think of project logic", "17/09/08", "1", "Just another project", false, "All")
-DOMdisplayTaskRow(task, tasksContainer)
+
 main.append(sidebar, todoContainer)
 body.append(nav, main)
+
+// task info dialog
+const taskCard = document.createElement("dialog");
+    taskCard.classList.add("task-card");
+    const taskContent = document.createElement("div");
+    taskContent.classList.add("dialog-content");
+    
+    const taskHeader = document.createElement("header");
+    taskHeader.classList.add("card-header")
+    const spaceTitle = document.createElement("h2");
+ 
+    const taskBtns = document.createElement("div");
+    taskBtns.classList.add("card-btns")
+    const editTaskBtn = document.createElement("button");
+    editTaskBtn.classList.add("edit-task", "svg","btn");
+    editTaskBtn.ariaLabel="Edit Task";
+    editTaskBtn.title = "Edit Task";
+    const editTaskIcon = document.createElement("img");
+    editTaskIcon.src= editIcon;
+    editTaskBtn.append(editTaskIcon);
+    
+    const deleteTaskBtn = document.createElement("button");
+    deleteTaskBtn.classList.add("delete-task", "svg","btn");
+    deleteTaskBtn.ariaLabel="Delete Task";
+    deleteTaskBtn.title = "Delete Task";
+    const deleteTaskIcon = document.createElement("img");
+    deleteTaskIcon.src= deleteIcon;
+    deleteTaskBtn.append(deleteTaskIcon);
+    
+    const closeTaskInfoBtn = document.createElement("button");
+    closeTaskInfoBtn.classList.add("close-info", "svg","btn");
+    closeTaskInfoBtn.ariaLabel="Hide Task Details";
+    closeTaskInfoBtn.title = "Hide Task Details";
+    const closeTaskInfoIcon = document.createElement("img");
+    closeTaskInfoIcon.src = cancelIcon;
+    closeTaskInfoBtn.append(closeTaskInfoIcon);
+    // close card on click
+    closeTaskInfoBtn.addEventListener("click", () => {
+        taskCard.close();
+    }
+    )
+    // close card on blur
+    taskCard.addEventListener('click', () => taskCard.close());
+    taskContent.addEventListener('click', (event) => event.stopPropagation());
+    
+    taskBtns.append(editTaskBtn, deleteTaskBtn, closeTaskInfoBtn)
+    taskHeader.append(spaceTitle, taskBtns)
+    
+    const taskMain = document.createElement("main");
+    taskMain.classList.add("card-main");
+    const taskHeadline = document.createElement("div");
+    taskHeadline.classList.add("card-task-info")
+    const rightSide = document.createElement("div");
+    const doneBtn = document.createElement("button");
+    doneBtn.classList.add("done-btn");
+    const taskTitle = document.createElement("h1");
+   
+    rightSide.append(doneBtn, taskTitle);
+    
+    const leftSide = document.createElement("div");
+    const taskPriority = document.createElement("div");
+    
+    const taskDueDate = document.createElement("div");
+    
+    leftSide.append(taskPriority, taskDueDate)
+    
+    const taskDescription = document.createElement("div");
+    taskDescription.classList.add("card-task-description")
+    
+    taskHeadline.append(rightSide, leftSide)
+    taskMain.append(taskHeadline, taskDescription)
+    taskContent.append(taskHeader, taskMain)
+    taskCard.append(taskContent)
+    body.append(taskCard);
+
+function getTaskCardElements(){
+    return {taskCard, spaceTitle, taskTitle, taskPriority, taskDueDate, taskDescription};
+}
+export {filteredSpaces, customSpaces, tasksContainer, getTaskCardElements}
 

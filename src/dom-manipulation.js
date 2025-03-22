@@ -1,4 +1,32 @@
-function DOMdisplaySpace(spaceObj, container){
+import editIcon from "./icons/edit.svg";
+import cancelIcon from "./icons/cancel.svg";
+import infoIcon from "./icons/info.svg";
+import deleteIcon from "./icons/delete.svg"
+import {getObjectId} from "./viewer-functions.js"
+import {getTaskObjById} from "./tasks.js"
+import {getTaskCardElements} from "./dom-content.js"
+const body = document.querySelector("body");
+const taskCardElements = getTaskCardElements();
+
+function DOMdisplayDefaultSpace(spaceObj, container){
+    const spacesContainer = container;
+    const newSpace = spaceObj;
+    const spaceRow = document.createElement("div");
+    spaceRow.classList.add("space-row");
+
+    const spaceLogo = document.createElement("div");
+    const spaceIcon = document.createElement("img");
+    spaceIcon.classList.add("space-icon", "svg");
+    // spaceIcon.src = newSpace.icon;
+    const spaceName = document.createElement("div");
+    spaceName.classList.add("space-name");
+    spaceName.textContent= newSpace.name;
+    spaceLogo.append(spaceIcon, spaceName)
+    spaceRow.append(spaceLogo)
+    spacesContainer.append(spaceRow);
+}
+
+function DOMdisplayCustomSpace(spaceObj, container){
     const spacesContainer = container;
     const newSpace = spaceObj;
     const spaceRow = document.createElement("div");
@@ -15,28 +43,46 @@ function DOMdisplaySpace(spaceObj, container){
     const spaceBtns = document.createElement("div");
     
     const editSpaceBtn = document.createElement("button");
-    editSpaceBtn.classList.add("edit-space", "btn");
+    editSpaceBtn.classList.add("edit-space", "btn", "svg");
     editSpaceBtn.ariaLabel="Edit Space";
     editSpaceBtn.title = "Edit Space";
-    editSpaceBtn.textContent="ed";
+    const editSpaceIcon = document.createElement("img");
+    editSpaceIcon.src= editIcon;
+    editSpaceBtn.append(editSpaceIcon);
 
     const deleteSpaceBtn = document.createElement("button");
-    deleteSpaceBtn.classList.add("delete-space", "btn");
+    deleteSpaceBtn.classList.add("delete-space", "btn", "svg");
     deleteSpaceBtn.ariaLabel="Delete Space";
     deleteSpaceBtn.title = "Delete Space";
-    deleteSpaceBtn.textContent="del";
+    const deleteSpaceIcon = document.createElement("img");
+    deleteSpaceIcon.src= deleteIcon;
+    deleteSpaceBtn.append(deleteSpaceIcon);
 
     spaceBtns.append(editSpaceBtn, deleteSpaceBtn)
     spaceLogo.append(spaceIcon, spaceName)
     spaceRow.append(spaceLogo, spaceBtns)
+    spaceRow.dataset.id = spaceObj.id;
     spacesContainer.append(spaceRow);
 }
+function DOMdisplayTaskInfo(e){
+   const taskId =  getObjectId(e);
+   const thisTask = getTaskObjById(taskId);
+ 
+   taskCardElements.spaceTitle.textContent = thisTask.space;
+   taskCardElements.taskTitle.textContent = thisTask.title;
+   taskCardElements.taskPriority.textContent = thisTask.priority;
+   taskCardElements.taskDueDate.textContent = thisTask.dueDate;
+   taskCardElements.taskDescription.textContent = thisTask.description;
+   taskCardElements.taskCard.dataset.id = thisTask.id;
+   taskCardElements.taskCard.showModal();
+    }
 
 function DOMdisplayTaskRow(taskObj, container){
     const tasksContainer = container;
     const newTask = taskObj;
     const taskRow = document.createElement("div");
     taskRow.classList.add("task-row");
+    taskRow.onclick=DOMdisplayTaskInfo;
 
     const leftContainer = document.createElement("div");
     const doneBtn = document.createElement("button");
@@ -49,6 +95,7 @@ function DOMdisplayTaskRow(taskObj, container){
     const rightContainer = document.createElement("div");
 
     const dueDate = document.createElement("div");
+    dueDate.textContent = newTask.dueDate;
     dueDate.classList.add("task-date");
 
     const priority = document.createElement("img");
@@ -57,82 +104,38 @@ function DOMdisplayTaskRow(taskObj, container){
     
     const taskBtns = document.createElement("div");
     const editTaskBtn = document.createElement("button");
-    editTaskBtn.classList.add("edit-task", "btn");
+    editTaskBtn.classList.add("edit-task", "svg","btn");
     editTaskBtn.ariaLabel="Edit Task";
     editTaskBtn.title = "Edit Task";
-    editTaskBtn.textContent="ed";
+    const editTaskIcon = document.createElement("img");
+    editTaskIcon.src= editIcon;
+    editTaskBtn.append(editTaskIcon);
 
     const deleteTaskBtn = document.createElement("button");
-    deleteTaskBtn.classList.add("delete-task", "btn");
+    deleteTaskBtn.classList.add("delete-task","svg","btn");
     deleteTaskBtn.ariaLabel="Delete Task";
     deleteTaskBtn.title = "Delete Task";
-    deleteTaskBtn.textContent="del";
+    const deleteTaskIcon = document.createElement("img");
+    deleteTaskIcon.src= deleteIcon;
+    deleteTaskBtn.append(deleteTaskIcon);
 
     const infoTaskBtn = document.createElement("button");
-    infoTaskBtn.classList.add("info-task", "btn");
+    infoTaskBtn.classList.add("info-task", "svg","btn");
     infoTaskBtn.ariaLabel="Show Task Details";
     infoTaskBtn.title = "Show Task Details";
-    infoTaskBtn.textContent="del";
+    infoTaskBtn.onclick=DOMdisplayTaskInfo;
+    const infoTaskIcon = document.createElement("img");
+    infoTaskIcon.src= infoIcon;
+    infoTaskBtn.append(infoTaskIcon);
 
     taskBtns.append(infoTaskBtn, editTaskBtn, deleteTaskBtn)
     rightContainer.append(dueDate, priority, taskBtns)
     taskRow.append(leftContainer, rightContainer)
+    taskRow.dataset.id = taskObj.id;
     tasksContainer.append(taskRow);
 }
 
-function DOMdisplayTaskInfo(task){
-const thisTask = task;
-const taskCard = document.createElement("dialog");
-taskCard.classList.add("task-card");
-const taskContent = document.createElement("div");
-taskContent.classList.add("dialog-content");
 
-const taskHeader = document.createElement("header");
-const spaceTitle = document.createElement("h1");
-spaceTitle.textContent = thisTask.space;
-const taskBtns = document.createElement("div");
-const editTaskBtn = document.createElement("button");
-editTaskBtn.classList.add("edit-task", "btn");
-editTaskBtn.ariaLabel="Edit Task";
-editTaskBtn.title = "Edit Task";
-editTaskBtn.textContent="ed";
 
-const deleteTaskBtn = document.createElement("button");
-deleteTaskBtn.classList.add("delete-task", "btn");
-deleteTaskBtn.ariaLabel="Delete Task";
-deleteTaskBtn.title = "Delete Task";
-deleteTaskBtn.textContent="del";
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo}
 
-const closeTaskInfoBtn = document.createElement("button");
-closeTaskInfoBtn.classList.add("close-info", "btn");
-closeTaskInfoBtn.ariaLabel="Hide Task Details";
-closeTaskInfoBtn.title = "Hide Task Details";
-closeTaskInfoBtn.textContent="cl";
-
-taskBtns.append(editTaskBtn, deleteTaskBtn, closeTaskInfoBtn)
-taskHeader.append(spaceTitle, taskBtns)
-
-const taskMain = document.createElement("main");
-const taskHeadline = document.createElement("div");
-const rightSide = document.createElement("div");
-const doneBtn = document.createElement("button");
-doneBtn.classList.add("done-btn");
-const taskTitle = document.createElement("h1");
-rightSide.append(doneBtn, taskTitle);
-
-const leftSide = document.createElement("div");
-const taskPriority = document.createElement("div");
-taskPriority.textContent = thisTask.priority;
-const taskDueDate = document.createElement("div");
-taskDueDate.textContent = thisTask.dueDate;
-leftSide.append(taskPriority, taskDueDate)
-
-const taskDescription = document.createElement("div");
-taskDescription.textContent = thisTask.description;
-taskHeadline.append(rightSide, leftSide)
-taskMain.append(taskHeadline, taskDescription)
-taskContent.append(taskHeader, taskMain)
-taskCard.append(taskContent)
-}
-
-export {DOMdisplaySpace, DOMdisplayTaskRow, DOMdisplayTaskInfo}

@@ -1,6 +1,176 @@
+/* reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+* {
+    font-size: 14px;
+    margin: 0;
+}
+
+body {
+    line-height: 1.25;
+    -webkit-font-smoothing: antialiased;
+    cursor: default;
+  }
+
+  img, svg {
+    display: block;
+    max-width: 100%;
+    /* disable prohibiting sign when dragging*/
+    pointer-events: none;
+  }
+
+  input, button, a, textarea {
+    font: inherit;
+  }
+
+  p {
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+
+  select {
+    appearance: none;
+  }
+
+  input:-webkit-autofill {
+    font-family: inherit;
+    border: none;
+    border-radius: .3rem;
+    caret-color: var(--black); 
+    color: var(--white);
+    background: var(--white);
+    -webkit-font-feature-settings: off;
+    -webkit-text-fill-color: var(--white); 
+    -webkit-background-clip: text; 
+    box-shadow: 0 0 0 50px var(var(--black-color)) inset; 
+    }
+
+    input, textarea{
+        outline: none;
+    }
+
+    /* disable textarea stretching */
+    textarea {
+        resize: none;
+    }
+
+  /* Disable copying buttons */
+  .btn {
+  user-select: none;
+  }
+  /* style */
+  :root{
+    --black: black;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+/* navigation */
+  .navigation{
+    display:flex;
+    align-items: center;
+    gap: 20px;
+  }
+/* main */
+.content-container{
+    display: flex;
+    gap:40px;
+}
+/* sidebar */
+.sidebar{
+    max-width: 40%;
+}
+.space-row{
+    display: flex;
+    align-items: center;
+    padding: 5px;
+}
+/* tasks */
+.todo-container{
+    /* width: 70%;  */
+}
+.task-row{
+    display: flex;
+    align-items: center;
+    gap:10px;
+    padding: 5px;
+}
+.task-row > div{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 .tasks-counter::before{
     content: "Tasks: (";
 }
 .tasks-counter::after{
     content: ")";
+}
+/* dialog */
+ dialog{
+    padding: 0;
+    align-self: center;
+    justify-self: center;
+    width: 60%;
+    height: 80%;
+ }
+ .dialog-content{
+    padding: 20px;
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+ }
+ .card-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+ }
+.card-btns{
+    display: flex;
+}
+.card-main{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.card-task-info{
+    display: flex;
+    justify-content: space-between;
+}
+.card-task-info > div{
+    display: flex;
+    gap: 5px;
+}
+
+.card-task-description{
+    border: 1px solid black;
+}
+
+.svg.btn{
+    background-color: transparent;
+    border-radius: 30px;
+    border: 1px solid transparent;
+    width: 40px;
+    height: 40px;
+}
+.btn:hover{
+    cursor:pointer;
+    transform: translateY(1px);
+}
+.btn:active{
+    transform: translateY(-1px);
+}
+.done-btn{
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+    border: 2px solid green;
+    border-radius: 30px;
+}
+.done-btn:hover{
+    cursor: pointer;
+}
+.task-row:hover{
+    cursor: pointer;;
 }
