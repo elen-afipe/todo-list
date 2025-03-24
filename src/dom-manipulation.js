@@ -3,7 +3,7 @@ import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
 import {getObjectId} from "./viewer-functions.js"
-import {getTaskObjById} from "./tasks.js"
+import {getTaskObjById, changeTaskDoneStatus} from "./tasks.js"
 import {getTaskCardElements} from "./dom-content.js"
 const body = document.querySelector("body");
 const taskCardElements = getTaskCardElements();
@@ -65,6 +65,7 @@ function DOMdisplayCustomSpace(spaceObj, container){
     spacesContainer.append(spaceRow);
 }
 function DOMdisplayTaskInfo(e){
+    // e.stopPropagation()
    const taskId =  getObjectId(e);
    const thisTask = getTaskObjById(taskId);
  
@@ -74,6 +75,7 @@ function DOMdisplayTaskInfo(e){
    taskCardElements.taskDueDate.textContent = thisTask.dueDate;
    taskCardElements.taskDescription.textContent = thisTask.description;
    taskCardElements.taskCard.dataset.id = thisTask.id;
+   taskCardElements.doneBtn.textContent = (thisTask.doneStatus === false) ? " " : "✓";
    taskCardElements.taskCard.showModal();
     }
 
@@ -82,11 +84,13 @@ function DOMdisplayTaskRow(taskObj, container){
     const newTask = taskObj;
     const taskRow = document.createElement("div");
     taskRow.classList.add("task-row");
-    taskRow.onclick=DOMdisplayTaskInfo;
+    // taskRow.onclick=DOMdisplayTaskInfo;
 
     const leftContainer = document.createElement("div");
+
     const doneBtn = document.createElement("button");
     doneBtn.classList.add("done-btn");
+
     const taskName = document.createElement("div");
     taskName.classList.add("task-name");
     taskName.textContent= newTask.title;
@@ -135,7 +139,48 @@ function DOMdisplayTaskRow(taskObj, container){
     tasksContainer.append(taskRow);
 }
 
+function findRowTickContainer(tickContainer, taskId){
+    // console.log(tickContainer.closest('.task-row') !== null)
+    const isInTaskRow = tickContainer.closest('.task-row') !== null;
+    if(isInTaskRow){
+        // extraTickContainer = document.querySelector(`.task-card[data-id="${taskId}"] .done-btn`);
+        return false;
+    }else{
+       const rowTickContainer = document.querySelector(`.task-row[data-id="${taskId}"] .done-btn`);
+        return rowTickContainer;
+    }
+
+}
+//add text crossed
+function handleTaskDoneClick(e){
+    const clickedTickContainer = e.target;
+    const taskId = getObjectId(e);
+    const thisTask = getTaskObjById(taskId);
+    const isThisTaskDone = thisTask.doneStatus;
+    const rowTickContainer = findRowTickContainer(clickedTickContainer, taskId);
+    const taskTitleDOM = document.querySelector(`.task-row[data-id="${taskId}"] .task-name`);
+    if (isThisTaskDone){
+        clickedTickContainer.textContent = " ";
+        if(rowTickContainer){rowTickContainer.textContent = " "}
+        taskTitleDOM.style.textDecoration = 'none';
+        changeTaskDoneStatus(thisTask); 
+    } else{
+        clickedTickContainer.textContent = "✓";
+        if(rowTickContainer){rowTickContainer.textContent = "✓"}
+        taskTitleDOM.style.textDecoration = 'line-through';
+        changeTaskDoneStatus(thisTask);
+    }   
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const doneBtns = document.querySelectorAll(".done-btn");
+    for (const doneBtn of doneBtns) {
+      doneBtn.onclick = handleTaskDoneClick;
+    }
+  });
+  
 
 
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo}
+
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick}
 

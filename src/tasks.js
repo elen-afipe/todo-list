@@ -36,8 +36,14 @@ function getTaskObjById(taskId){
       );
     return tasks[index];
 }
+function changeTaskDoneStatus(task){
+    task.doneStatus = !task.doneStatus;
+}
 
-export {createTaskObject, getTaskObjById}
+// function getNumberOfTasks(space){
+
+// }
+export {createTaskObject, getTaskObjById, changeTaskDoneStatus}
 
 
 

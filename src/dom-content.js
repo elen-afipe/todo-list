@@ -3,6 +3,7 @@ import cancelIcon from "./icons/cancel.svg";
 import deleteIcon from "./icons/delete.svg"
 import sidebarIcon from "./icons/sidebar.svg"
 import addIcon from "./icons/add.svg"
+
 const body = document.querySelector("body");
 
 // navigation
@@ -141,6 +142,8 @@ const taskCard = document.createElement("dialog");
     const rightSide = document.createElement("div");
     const doneBtn = document.createElement("button");
     doneBtn.classList.add("done-btn");
+    
+    
     const taskTitle = document.createElement("h1");
    
     rightSide.append(doneBtn, taskTitle);
@@ -161,8 +164,12 @@ const taskCard = document.createElement("dialog");
     taskCard.append(taskContent)
     body.append(taskCard);
 
+    
 function getTaskCardElements(){
-    return {taskCard, spaceTitle, taskTitle, taskPriority, taskDueDate, taskDescription};
+    return {taskCard, spaceTitle, taskTitle, taskPriority, taskDueDate, taskDescription, doneBtn};
 }
+
+// import {handleTaskDoneClick} from "./dom-manipulation.js"
+    // doneBtn.onclick=handleTaskDoneClick;
 export {filteredSpaces, customSpaces, tasksContainer, getTaskCardElements}
 

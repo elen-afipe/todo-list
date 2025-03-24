@@ -167,10 +167,17 @@ body {
     background-color: transparent;
     border: 2px solid green;
     border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px; 
 }
 .done-btn:hover{
     cursor: pointer;
 }
 .task-row:hover{
-    cursor: pointer;;
+    cursor: pointer;
 }
+/* .task-card[data-id=2] .done-btn{
+    border: 3px solid red;
+} */
