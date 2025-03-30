@@ -1,4 +1,5 @@
 
+import {getObjectId} from "./viewer-functions.js"
 const TasksObj = [];
 function Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskChecked, taskSpace){
     this.title = taskTitle;
@@ -40,10 +41,23 @@ function changeTaskDoneStatus(task){
     task.doneStatus = !task.doneStatus;
 }
 
+function getTaskIndex(e){
+    const taskId = getObjectId(e);
+    const tasks = getTasksObj();
+    return tasks.findIndex(task => 
+        task.id === taskId
+      );
+}
+
+function deleteTaskObj(e){
+    const taskIndex = getTaskIndex(e)
+    const tasks = getTasksObj();
+    tasks.splice(taskIndex, 1);
+}
 // function getNumberOfTasks(space){
 
 // }
-export {createTaskObject, getTaskObjById, changeTaskDoneStatus}
+export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj}
 
 
 

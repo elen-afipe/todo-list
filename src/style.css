@@ -64,6 +64,7 @@ body {
   :root{
     --black: black;
     font-family: Arial, Helvetica, sans-serif;
+    --background: white;
   }
 /* navigation */
   .navigation{
@@ -178,6 +179,3 @@ body {
 .task-row:hover{
     cursor: pointer;
 }
-/* .task-card[data-id=2] .done-btn{
-    border: 3px solid red;
-} */

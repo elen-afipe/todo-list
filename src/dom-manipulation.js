@@ -3,7 +3,8 @@ import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
 import {getObjectId} from "./viewer-functions.js"
-import {getTaskObjById, changeTaskDoneStatus} from "./tasks.js"
+import {getTaskObjById, changeTaskDoneStatus, deleteTaskObj} from "./tasks.js"
+import { deleteSpaceObj } from "./spaces.js";
 import {getTaskCardElements} from "./dom-content.js"
 const body = document.querySelector("body");
 const taskCardElements = getTaskCardElements();
@@ -49,11 +50,12 @@ function DOMdisplayCustomSpace(spaceObj, container){
     const editSpaceIcon = document.createElement("img");
     editSpaceIcon.src= editIcon;
     editSpaceBtn.append(editSpaceIcon);
-
+    // editSpaceBtn.addEventListener
     const deleteSpaceBtn = document.createElement("button");
     deleteSpaceBtn.classList.add("delete-space", "btn", "svg");
     deleteSpaceBtn.ariaLabel="Delete Space";
     deleteSpaceBtn.title = "Delete Space";
+    deleteSpaceBtn.onclick=deleteSpace;
     const deleteSpaceIcon = document.createElement("img");
     deleteSpaceIcon.src= deleteIcon;
     deleteSpaceBtn.append(deleteSpaceIcon);
@@ -119,6 +121,7 @@ function DOMdisplayTaskRow(taskObj, container){
     deleteTaskBtn.classList.add("delete-task","svg","btn");
     deleteTaskBtn.ariaLabel="Delete Task";
     deleteTaskBtn.title = "Delete Task";
+    deleteTaskBtn.onclick=deleteTask;
     const deleteTaskIcon = document.createElement("img");
     deleteTaskIcon.src= deleteIcon;
     deleteTaskBtn.append(deleteTaskIcon);
@@ -180,7 +183,25 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
 
+function deleteTaskFromDOM(e){
+    const taskId = getObjectId(e);
+    const taskContainer = document.querySelector(`.task-row[data-id="${taskId}"]`)
+    taskContainer.remove();
+}
+function deleteTask(e){
+    deleteTaskObj(e);
+    deleteTaskFromDOM(e);
+}
 
+function deleteSpaceFromDOM(e){
+    const spaceId = getObjectId(e);
+    const spaceContainer = document.querySelector(`.space-row[data-id="${spaceId}"]`)
+    spaceContainer.remove();
+}
+function deleteSpace(e){
+    deleteSpaceObj(e);
+    deleteSpaceFromDOM(e);
+}
 
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick}
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace}
 
