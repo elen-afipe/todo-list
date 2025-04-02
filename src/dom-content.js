@@ -4,7 +4,14 @@ import deleteIcon from "./icons/delete.svg"
 import sidebarIcon from "./icons/sidebar.svg"
 import addIcon from "./icons/add.svg";
 import emojiIcon from "./icons/emoji.svg"
-import 'emoji-picker-element';
+import { Picker } from 'emoji-picker-element';
+import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
+polyfillCountryFlagEmojis('Twemoji Mozilla');
+// import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask } from "./dom-manipulation";
+import { createSpaceObject } from "./spaces";
+import { createTaskObject } from "./tasks";
+import {getTaskPrioritySymbols} from "./tasks.js"
 const body = document.querySelector("body");
 
 // navigation
@@ -43,8 +50,8 @@ todoContainer.classList.add("todo-container");
 
 const headerRow = document.createElement("header");
 headerRow.classList.add("header-row");
-const spaceIcon = document.createElement("img");
-spaceIcon.classList.add("space-icon", "svg")
+const spaceIcon = document.createElement("div");
+spaceIcon.classList.add("space-icon", "emoji")
 const spaceHeader = document.createElement("h1");
 spaceHeader.classList.add("space-header")
 headerRow.append(spaceIcon, spaceHeader)
@@ -53,7 +60,7 @@ const taskRow1 = document.createElement("div");
 taskRow1.classList.add("task-row", "first");
 const tasksCounterContainer = document.createElement("div");
 tasksCounterContainer.classList.add("counter-container");
-const tasksCounterHead = document.createElement
+// const tasksCounterHead = document.createElement
 
 const tasksCounter = document.createElement("span");
 tasksCounter.classList.add("tasks-counter");
@@ -96,6 +103,29 @@ sidebar.append(filteredSpaces, customSpaces, addSpaceBtn);
 main.append(sidebar, todoContainer)
 body.append(nav, main)
 
+
+const allSpace = createSpaceObject("All", "📚️");
+const todaySpace = createSpaceObject("Today", "📝");
+const weekSpace = createSpaceObject("Week", "📑");
+const monthSpace = createSpaceObject("Month", "📆");
+
+DOMdisplayDefaultSpace(allSpace, filteredSpaces);
+DOMdisplayDefaultSpace(todaySpace, filteredSpaces);
+DOMdisplayDefaultSpace(weekSpace, filteredSpaces);
+DOMdisplayDefaultSpace(monthSpace, filteredSpaces);
+
+const mySpace = createSpaceObject("My project", "👾");
+DOMdisplayCustomSpace(mySpace, customSpaces);
+
+
+const task0 = createTaskObject("MAKE CREATING SPACE WORK", "18/09/08", "high", "Just another task", "My project")
+DOMdisplayTaskRow(task0, tasksContainer)
+const task1 = createTaskObject("Think of project logic", "17/09/08", "high", "Just another project", "My project")
+DOMdisplayTaskRow(task1, tasksContainer)
+const task2 = createTaskObject("Gather assets", "18/09/08", "medium", "Just another task", "My project")
+DOMdisplayTaskRow(task2, tasksContainer)
+
+
 // task info card dialog
 const taskCard = document.createElement("dialog");
     taskCard.classList.add("task-card");
@@ -123,6 +153,7 @@ const taskCard = document.createElement("dialog");
     const deleteTaskIcon = document.createElement("img");
     deleteTaskIcon.src= deleteIcon;
     deleteTaskBtn.append(deleteTaskIcon);
+    deleteTaskBtn.addEventListener("click", (e)=>{deleteTask(e)})
     
     const closeTaskInfoBtn = document.createElement("button");
     closeTaskInfoBtn.classList.add("close-info", "svg","btn");
@@ -141,6 +172,7 @@ const taskCard = document.createElement("dialog");
     taskContent.addEventListener('click', (event) => event.stopPropagation());
     
     taskBtns.append(editTaskBtn, deleteTaskBtn, closeTaskInfoBtn)
+    // taskBtns.append(closeTaskInfoBtn)
     taskHeader.append(spaceTitle, taskBtns)
     
     const taskMain = document.createElement("main");
@@ -176,6 +208,7 @@ const taskCard = document.createElement("dialog");
 function getTaskCardElements(){
     return {taskCard, spaceTitle, taskTitle, taskPriority, taskDueDate, taskDescription, doneBtn};
 }
+const taskCardElements = getTaskCardElements();
 
 // dialog form for creating and editing tasks
 const taskDialog = document.createElement("dialog");
@@ -227,6 +260,7 @@ const taskDialog = document.createElement("dialog");
     const taskFormRow3 = document.createElement("div");
     taskFormRow3.classList.add("form-row");
 
+    const taskPrioritySymbols = getTaskPrioritySymbols();
     const taskPriorityLabel = document.createElement("label");
     taskPriorityLabel.textContent='Priority';
     taskPriorityLabel.for="task-date";
@@ -239,13 +273,13 @@ const taskDialog = document.createElement("dialog");
     taskPriorityDefault.disabled=true;
     taskPriorityDefault.selected=true;
     const taskPriorityLow = document.createElement("option");
-    taskPriorityLow.textContent="🟢 Low";
+    taskPriorityLow.textContent=`${taskPrioritySymbols.low} Low`;
     taskPriorityLow.value="low";
     const taskPriorityMed = document.createElement("option");
-    taskPriorityMed.textContent="🟡 Medium";
+    taskPriorityMed.textContent=`${taskPrioritySymbols.medium} Medium`;
     taskPriorityMed.value="medium";
     const taskPriorityMax = document.createElement("option");
-    taskPriorityMax.textContent="🔴 High";
+    taskPriorityMax.textContent=`${taskPrioritySymbols.high} High`;
     taskPriorityMax.value="high";
     taskPrioritySelect.append(taskPriorityDefault, taskPriorityLow, taskPriorityMed, taskPriorityMax)
     taskFormRow3.append(taskPriorityLabel, taskPrioritySelect)
@@ -299,7 +333,10 @@ spaceDialog.classList.add("space-form");
     spaceFormCloseBtn.classList.add("close-btn", "btn", "svg");
     spaceFormCloseBtn.title="Close dialog";
     spaceFormCloseBtn.ariaLabel="Close dialog";
-    spaceFormCloseBtn.addEventListener("click", ()=> spaceDialog.close());
+    spaceFormCloseBtn.addEventListener("click", ()=> {
+        spaceDialog.close();
+        spaceForm.reset();
+    });
     spaceDialog.addEventListener('click', ()=> spaceDialog.close());
     spaceFormContent.addEventListener('click', (event) => event.stopPropagation());
 
@@ -334,7 +371,7 @@ spaceDialog.classList.add("space-form");
     spaceIconInput.type="text";
     spaceIconInput.readOnly=true;
 
-    const emojiPicker = document.createElement("emoji-picker");
+    const emojiPicker = new Picker();
     emojiPicker.id = "emojiPicker";
     emojiPicker.hidden=true;
     emojiPicker.classList.add('light', 'hidden');
@@ -346,7 +383,8 @@ spaceDialog.classList.add("space-form");
     const showPickerIcon = document.createElement("img");
     showPickerIcon.src=emojiIcon;
     showPickerBtn.append(showPickerIcon);
-    showPickerBtn.addEventListener('click', () => {
+    showPickerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         emojiPicker.classList.toggle('hidden');
         emojiPicker.removeAttribute("hidden");
       });
@@ -354,9 +392,7 @@ spaceDialog.classList.add("space-form");
     emojiPicker.addEventListener('emoji-click', event => {
         spaceIconInput.value = event.detail.unicode;
         emojiPicker.hidden=true;
-        // Store the selected emoji to your project
-        // emojiPicker.hidden=false;
-        
+        console.log(spaceIconInput.value)
         emojiPicker.classList.add('hidden');
       });
     spaceFormRow2.append(spaceIconLabel, spaceIconInput, showPickerBtn, emojiPicker)
@@ -364,10 +400,20 @@ spaceDialog.classList.add("space-form");
     const spaceFormBtn = document.createElement("button");
     spaceFormBtn.classList.add("space-form-btn")
     spaceFormBtn.textContent="Add space"
+    spaceFormBtn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        // ADD INPUT CHECKS
+        const icon = spaceIconInput.value ? spaceIconInput.value : "📄";
+        const newSpace = createSpaceObject(spaceTitleInput.value, icon);
+        DOMdisplayCustomSpace(newSpace, customSpaces);
+        spaceForm.reset();
+        spaceDialog.close();
+    })
+
     spaceForm.append(spaceFormLegend, spaceFormRow1, spaceFormRow2, spaceFormBtn)
     spaceFormContent.append(spaceFormCloseBtn, spaceForm)
     spaceDialog.append(spaceFormContent)
     body.append(spaceDialog);
 
-export {filteredSpaces, customSpaces, tasksContainer, getTaskCardElements}
+export {filteredSpaces, customSpaces, tasksContainer, taskCardElements}
 

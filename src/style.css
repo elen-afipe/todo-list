@@ -179,3 +179,8 @@ body {
 .task-row:hover{
     cursor: pointer;
 }
+
+.emoji{
+    font-size: 2rem;
+    /* font-family: ; */
+}

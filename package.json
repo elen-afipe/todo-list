@@ -14,6 +14,7 @@
     "deploy": "git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
+    "country-flag-emoji-polyfill": "^0.1.8",
     "date-fns": "^4.1.0",
     "emoji-picker-element": "^1.26.1"
   }

@@ -27,18 +27,25 @@ function generateSpaceId(){
     return currentSpaceId;
 }
 
+
 function getSpaceIndex(e){
     const spaceId = getObjectId(e);
     const spaces = getSpacesObj();
-    return spaces.findIndex(space => 
-        space.id === spaceId
+    const index = spaces.findIndex(space => 
+        Number(space.id) === Number(spaceId)
       );
+      if (index === -1){
+        return "no match"
+      }
+      return index;
 }
 
 function deleteSpaceObj(e){
     const spaceIndex = getSpaceIndex(e)
     const spaces = getSpacesObj();
+    if (spaceIndex !== "no match"){
     spaces.splice(spaceIndex, 1);
+    }
 }
 
 export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj}

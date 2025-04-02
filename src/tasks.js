@@ -1,15 +1,25 @@
 
 import {getObjectId} from "./viewer-functions.js"
 const TasksObj = [];
-function Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskChecked, taskSpace){
+function Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpace){
     this.title = taskTitle;
     this.dueDate = taskDueDate;
     this.priority = taskPriority;
     this.description = taskDescription;
-    this.doneStatus = taskChecked;
+    this.doneStatus = false;
     this.space = taskSpace;
     this.id = generateTaskId();
 }
+const TaskPrioritySymbols = {
+    low: "🟢",
+    medium: "🟡",
+    high: "🔴",
+}
+
+function getTaskPrioritySymbols(){
+    return TaskPrioritySymbols;
+}
+
 function getTasksObj(){
     return TasksObj;
 }
@@ -44,20 +54,30 @@ function changeTaskDoneStatus(task){
 function getTaskIndex(e){
     const taskId = getObjectId(e);
     const tasks = getTasksObj();
-    return tasks.findIndex(task => 
-        task.id === taskId
+    const index = tasks.findIndex(task => 
+        Number(task.id) === Number(taskId)
       );
+      if (index === -1) { // -1 means no match
+        return "no match";
+    }
+    return index;
 }
 
+
 function deleteTaskObj(e){
-    const taskIndex = getTaskIndex(e)
+    const taskIndex = getTaskIndex(e);
+    console.log(taskIndex)
     const tasks = getTasksObj();
-    tasks.splice(taskIndex, 1);
+    console.log(tasks);
+    if(taskIndex !== "no match"){
+        tasks.splice(taskIndex, 1);
+        console.log(tasks);
+    }
 }
 // function getNumberOfTasks(space){
 
 // }
-export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj}
+export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols}
 
 
 

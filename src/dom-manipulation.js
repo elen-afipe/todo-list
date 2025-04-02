@@ -3,11 +3,10 @@ import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
 import {getObjectId} from "./viewer-functions.js"
-import {getTaskObjById, changeTaskDoneStatus, deleteTaskObj} from "./tasks.js"
+import {getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols} from "./tasks.js"
 import { deleteSpaceObj } from "./spaces.js";
-import {getTaskCardElements} from "./dom-content.js"
+import {taskCardElements} from "./dom-content.js"
 const body = document.querySelector("body");
-const taskCardElements = getTaskCardElements();
 
 function DOMdisplayDefaultSpace(spaceObj, container){
     const spacesContainer = container;
@@ -16,9 +15,9 @@ function DOMdisplayDefaultSpace(spaceObj, container){
     spaceRow.classList.add("space-row");
 
     const spaceLogo = document.createElement("div");
-    const spaceIcon = document.createElement("img");
-    spaceIcon.classList.add("space-icon", "svg");
-    // spaceIcon.src = newSpace.icon;
+    const spaceIcon = document.createElement("div");
+    spaceIcon.classList.add("space-icon", "emoji");
+    spaceIcon.textContent = newSpace.icon;
     const spaceName = document.createElement("div");
     spaceName.classList.add("space-name");
     spaceName.textContent= newSpace.name;
@@ -34,9 +33,9 @@ function DOMdisplayCustomSpace(spaceObj, container){
     spaceRow.classList.add("space-row");
 
     const spaceLogo = document.createElement("div");
-    const spaceIcon = document.createElement("img");
-    spaceIcon.classList.add("space-icon", "svg");
-    // spaceIcon.src = newSpace.icon;
+    const spaceIcon = document.createElement("div");
+    spaceIcon.classList.add("space-icon", "emoji");
+    spaceIcon.textContent = newSpace.icon;
     const spaceName = document.createElement("div");
     spaceName.classList.add("space-name");
     spaceName.textContent= newSpace.name;
@@ -70,16 +69,30 @@ function DOMdisplayTaskInfo(e){
     // e.stopPropagation()
    const taskId =  getObjectId(e);
    const thisTask = getTaskObjById(taskId);
- 
    taskCardElements.spaceTitle.textContent = thisTask.space;
    taskCardElements.taskTitle.textContent = thisTask.title;
-   taskCardElements.taskPriority.textContent = thisTask.priority;
+   taskCardElements.taskPriority.textContent = getPriorityEmoji(thisTask);
    taskCardElements.taskDueDate.textContent = thisTask.dueDate;
    taskCardElements.taskDescription.textContent = thisTask.description;
    taskCardElements.taskCard.dataset.id = thisTask.id;
    taskCardElements.doneBtn.textContent = (thisTask.doneStatus === false) ? " " : "✓";
    taskCardElements.taskCard.showModal();
     }
+
+function getPriorityEmoji(task){
+    let priorityContent = "";
+    const prioritySymbols = getTaskPrioritySymbols();
+    if(task.priority === "low"){
+        priorityContent = prioritySymbols.low;
+    }
+    else if(task.priority === "medium"){
+        priorityContent = prioritySymbols.medium;
+    }
+    else if(task.priority === "high"){
+        priorityContent = prioritySymbols.high;
+    }
+    return priorityContent;
+}
 
 function DOMdisplayTaskRow(taskObj, container){
     const tasksContainer = container;
@@ -104,8 +117,9 @@ function DOMdisplayTaskRow(taskObj, container){
     dueDate.textContent = newTask.dueDate;
     dueDate.classList.add("task-date");
 
-    const priority = document.createElement("img");
-    priority.classList.add("task-priority");
+    const priority = document.createElement("div");
+    priority.textContent = getPriorityEmoji(newTask);
+    priority.classList.add("task-priority", "emoji");
 
     
     const taskBtns = document.createElement("div");
@@ -186,7 +200,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function deleteTaskFromDOM(e){
     const taskId = getObjectId(e);
     const taskContainer = document.querySelector(`.task-row[data-id="${taskId}"]`)
+    if (taskContainer){
     taskContainer.remove();
+    }
 }
 function deleteTask(e){
     deleteTaskObj(e);
@@ -196,7 +212,9 @@ function deleteTask(e){
 function deleteSpaceFromDOM(e){
     const spaceId = getObjectId(e);
     const spaceContainer = document.querySelector(`.space-row[data-id="${spaceId}"]`)
+    if(spaceContainer){
     spaceContainer.remove();
+    }
 }
 function deleteSpace(e){
     deleteSpaceObj(e);
