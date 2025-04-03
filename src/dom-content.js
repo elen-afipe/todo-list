@@ -8,7 +8,7 @@ import { Picker } from 'emoji-picker-element';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
 // import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
-import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask } from "./dom-manipulation";
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks} from "./dom-manipulation";
 import { createSpaceObject } from "./spaces";
 import { createTaskObject } from "./tasks";
 import {getTaskPrioritySymbols} from "./tasks.js"
@@ -104,26 +104,26 @@ main.append(sidebar, todoContainer)
 body.append(nav, main)
 
 
-const allSpace = createSpaceObject("All", "📚️");
-const todaySpace = createSpaceObject("Today", "📝");
-const weekSpace = createSpaceObject("Week", "📑");
-const monthSpace = createSpaceObject("Month", "📆");
+const allSpace = createSpaceObject("All", "📚️", true);
+const todaySpace = createSpaceObject("Today", "📝", false);
+const weekSpace = createSpaceObject("Week", "📑", false);
+const monthSpace = createSpaceObject("Month", "📆", false);
 
 DOMdisplayDefaultSpace(allSpace, filteredSpaces);
 DOMdisplayDefaultSpace(todaySpace, filteredSpaces);
 DOMdisplayDefaultSpace(weekSpace, filteredSpaces);
 DOMdisplayDefaultSpace(monthSpace, filteredSpaces);
 
-const mySpace = createSpaceObject("My project", "👾");
+const mySpace = createSpaceObject("My project", "👾", true);
 DOMdisplayCustomSpace(mySpace, customSpaces);
 
 
-const task0 = createTaskObject("MAKE CREATING SPACE WORK", "18/09/08", "high", "Just another task", "My project")
-DOMdisplayTaskRow(task0, tasksContainer)
-const task1 = createTaskObject("Think of project logic", "17/09/08", "high", "Just another project", "My project")
-DOMdisplayTaskRow(task1, tasksContainer)
-const task2 = createTaskObject("Gather assets", "18/09/08", "medium", "Just another task", "My project")
-DOMdisplayTaskRow(task2, tasksContainer)
+const task0 = createTaskObject("MAKE CREATING TASKS WORK", "18/09/08", "high", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+// DOMdisplayTaskRow(task0, tasksContainer)
+const task1 = createTaskObject("Think of project logic", "17/09/08", "high", "Just another project", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+// DOMdisplayTaskRow(task1, tasksContainer)
+const task2 = createTaskObject("Gather assets", "18/09/08", "medium", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+// DOMdisplayTaskRow(task2, tasksContainer)
 
 
 // task info card dialog
@@ -153,7 +153,10 @@ const taskCard = document.createElement("dialog");
     const deleteTaskIcon = document.createElement("img");
     deleteTaskIcon.src= deleteIcon;
     deleteTaskBtn.append(deleteTaskIcon);
-    deleteTaskBtn.addEventListener("click", (e)=>{deleteTask(e)})
+    deleteTaskBtn.addEventListener("click", (e)=>{
+        deleteTask(e);
+        taskCard.close();
+    })
     
     const closeTaskInfoBtn = document.createElement("button");
     closeTaskInfoBtn.classList.add("close-info", "svg","btn");
@@ -219,7 +222,10 @@ const taskDialog = document.createElement("dialog");
     taskFormCloseBtn.classList.add("close-btn", "btn", "svg");
     taskFormCloseBtn.title="Close dialog";
     taskFormCloseBtn.ariaLabel="Close dialog";
-    taskFormCloseBtn.addEventListener("click", ()=> taskDialog.close());
+    taskFormCloseBtn.addEventListener("click", ()=> {
+        taskForm.reset();
+        taskDialog.close();
+    });
     taskDialog.addEventListener('click', ()=> taskDialog.close());
     taskFormContent.addEventListener('click', (event) => event.stopPropagation());
 
@@ -271,7 +277,7 @@ const taskDialog = document.createElement("dialog");
     taskPriorityDefault.textContent="Select priority";
     taskPriorityDefault.value="";
     taskPriorityDefault.disabled=true;
-    taskPriorityDefault.selected=true;
+    taskPriorityDefault.setAttribute("selected", "");
     const taskPriorityLow = document.createElement("option");
     taskPriorityLow.textContent=`${taskPrioritySymbols.low} Low`;
     taskPriorityLow.value="low";
@@ -308,20 +314,28 @@ const taskDialog = document.createElement("dialog");
     taskSpaceDefault.textContent="Select space";
     taskSpaceDefault.value="";
     taskSpaceDefault.disabled=true;
-    taskSpaceDefault.selected=true;
-    const taskSpaceAll = document.createElement("option");
-    taskSpaceAll.textContent="All";
-    taskSpaceSelect.append(taskSpaceDefault, taskSpaceAll)
+    taskSpaceDefault.setAttribute("selected", "");
+    taskSpaceSelect.append(taskSpaceDefault)
     taskFormRow5.append(taskSpaceLabel, taskSpaceSelect)
+    updateSpaceSelectOptions();
 
     const taskFormBtn = document.createElement("button");
-    taskFormBtn.classList.add("task-form-btn")
-    taskFormBtn.textContent="Add task"
+    taskFormBtn.classList.add("task-form-btn");
+    taskFormBtn.textContent="Add task";
+    taskFormBtn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        // console.log(taskPrioritySelect.value)
+        const selectedSpace = taskSpaceSelect.options[taskSpaceSelect.selectedIndex];
+        const newTask = createTaskObject(taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
+        // DOMdisplayTasks(e, selectedSpace.value);
+        taskForm.reset();
+        taskDialog.close();
+    })
+
     taskForm.append(taskFormLegend, taskFormRow1, taskFormRow2, taskFormRow3, taskFormRow4, taskFormRow5, taskFormBtn)
     taskFormContent.append(taskFormCloseBtn, taskForm)
     taskDialog.append(taskFormContent)
     body.append(taskDialog);
-
 
 
 // dialog form for creating and editing spaces
@@ -404,7 +418,8 @@ spaceDialog.classList.add("space-form");
         e.preventDefault();
         // ADD INPUT CHECKS
         const icon = spaceIconInput.value ? spaceIconInput.value : "📄";
-        const newSpace = createSpaceObject(spaceTitleInput.value, icon);
+        const newSpace = createSpaceObject(spaceTitleInput.value, icon, true);
+        updateSpaceSelectOptions();
         DOMdisplayCustomSpace(newSpace, customSpaces);
         spaceForm.reset();
         spaceDialog.close();
@@ -415,5 +430,5 @@ spaceDialog.classList.add("space-form");
     spaceDialog.append(spaceFormContent)
     body.append(spaceDialog);
 
-export {filteredSpaces, customSpaces, tasksContainer, taskCardElements}
+export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect}
 

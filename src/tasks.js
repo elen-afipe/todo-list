@@ -1,13 +1,14 @@
 
 import {getObjectId} from "./viewer-functions.js"
 const TasksObj = [];
-function Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpace){
+function Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpaceTitle, taskSpaceId){
     this.title = taskTitle;
     this.dueDate = taskDueDate;
     this.priority = taskPriority;
     this.description = taskDescription;
     this.doneStatus = false;
-    this.space = taskSpace;
+    this.spaceTitle = taskSpaceTitle;
+    this.spaceId = taskSpaceId;
     this.id = generateTaskId();
 }
 const TaskPrioritySymbols = {
@@ -29,8 +30,8 @@ function generateTaskId(){
     currentTaskId+=1;
     return currentTaskId;
 }
-function createTaskObject(taskTitle, taskDueDate, taskPriority, taskDescription, taskChecked, taskSpace){
-    const newTask = new Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskChecked, taskSpace);
+function createTaskObject(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpaceTitle, taskSpaceId){
+    const newTask = new Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpaceTitle, taskSpaceId);
     addTaskToTasks(newTask);
     return newTask;
 }
@@ -77,7 +78,7 @@ function deleteTaskObj(e){
 // function getNumberOfTasks(space){
 
 // }
-export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols}
+export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols, getTasksObj}
 
 
 

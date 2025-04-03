@@ -1,9 +1,10 @@
 import {getObjectId} from "./viewer-functions.js"
 
 const Spaces = [];
-function Space(spaceName, spaceIcon, spaceTasks){
-    this.name = spaceName; // string
+function Space(spaceTitle, spaceIcon, isSelectLabel){
+    this.title = spaceTitle; // string
     this.icon = spaceIcon; // emoji or svg or number 
+    this.isSelectLabel = isSelectLabel ? true : false;
     this.tasks = []; // array with tasks id
     this.id = generateSpaceId(); // id
 }
@@ -11,8 +12,8 @@ function getSpacesObj(){
     return Spaces;
 }
 
-function createSpaceObject(spaceName, spaceIcon){
-    const newSpace = new Space(spaceName, spaceIcon);
+function createSpaceObject(spaceTitle, spaceIcon, isSelectLabel){
+    const newSpace = new Space(spaceTitle, spaceIcon, isSelectLabel);
     addSpaceToSpaces(newSpace)
     return newSpace;
 }
@@ -48,4 +49,4 @@ function deleteSpaceObj(e){
     }
 }
 
-export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj}
+export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj}

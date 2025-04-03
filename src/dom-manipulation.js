@@ -3,9 +3,9 @@ import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
 import {getObjectId} from "./viewer-functions.js"
-import {getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols} from "./tasks.js"
-import { deleteSpaceObj } from "./spaces.js";
-import {taskCardElements} from "./dom-content.js"
+import {getTasksObj, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols} from "./tasks.js"
+import { getSpacesObj, deleteSpaceObj } from "./spaces.js";
+import {taskCardElements, taskSpaceSelect, tasksContainer} from "./dom-content.js"
 const body = document.querySelector("body");
 
 function DOMdisplayDefaultSpace(spaceObj, container){
@@ -13,16 +13,17 @@ function DOMdisplayDefaultSpace(spaceObj, container){
     const newSpace = spaceObj;
     const spaceRow = document.createElement("div");
     spaceRow.classList.add("space-row");
-
+    spaceRow.dataset.id = spaceObj.id;
     const spaceLogo = document.createElement("div");
     const spaceIcon = document.createElement("div");
     spaceIcon.classList.add("space-icon", "emoji");
     spaceIcon.textContent = newSpace.icon;
-    const spaceName = document.createElement("div");
-    spaceName.classList.add("space-name");
-    spaceName.textContent= newSpace.name;
-    spaceLogo.append(spaceIcon, spaceName)
+    const spaceTitle = document.createElement("div");
+    spaceTitle.classList.add("space-name");
+    spaceTitle.textContent= newSpace.title;
+    spaceLogo.append(spaceIcon, spaceTitle)
     spaceRow.append(spaceLogo)
+    spaceRow.onclick=DOMdisplayTasks;
     spacesContainer.append(spaceRow);
 }
 
@@ -36,9 +37,9 @@ function DOMdisplayCustomSpace(spaceObj, container){
     const spaceIcon = document.createElement("div");
     spaceIcon.classList.add("space-icon", "emoji");
     spaceIcon.textContent = newSpace.icon;
-    const spaceName = document.createElement("div");
-    spaceName.classList.add("space-name");
-    spaceName.textContent= newSpace.name;
+    const spaceTitle = document.createElement("div");
+    spaceTitle.classList.add("space-name");
+    spaceTitle.textContent= newSpace.title;
 
     const spaceBtns = document.createElement("div");
     
@@ -54,22 +55,40 @@ function DOMdisplayCustomSpace(spaceObj, container){
     deleteSpaceBtn.classList.add("delete-space", "btn", "svg");
     deleteSpaceBtn.ariaLabel="Delete Space";
     deleteSpaceBtn.title = "Delete Space";
-    deleteSpaceBtn.onclick=deleteSpace;
+    deleteSpaceBtn.addEventListener("click", (e)=>{
+        deleteSpace(e); 
+        DOMdisplayTasks(e, 1);
+    })
     const deleteSpaceIcon = document.createElement("img");
     deleteSpaceIcon.src= deleteIcon;
     deleteSpaceBtn.append(deleteSpaceIcon);
 
     spaceBtns.append(editSpaceBtn, deleteSpaceBtn)
-    spaceLogo.append(spaceIcon, spaceName)
+    spaceLogo.append(spaceIcon, spaceTitle)
     spaceRow.append(spaceLogo, spaceBtns)
     spaceRow.dataset.id = spaceObj.id;
+    spaceRow.onclick=DOMdisplayTasks;
+    // spaceRow.addEventListener("click", 
+    //     DOMdisplayTasks
+    // //     ()=>{
+    // //     tasksContainer.innerHTML="";
+    // //    const tasks = getTasksObj();
+    // // //    console.log(spaceRow.dataset.id)
+    // //    tasks.forEach(task => {
+    // //     if (Number(task.spaceId) === Number(spaceRow.dataset.id)){
+    // //         DOMdisplayTaskRow(task, tasksContainer)
+    // //         }
+    // //     })
+    // // }
+    // )
+    
     spacesContainer.append(spaceRow);
 }
 function DOMdisplayTaskInfo(e){
-    // e.stopPropagation()
+    e.stopPropagation();
    const taskId =  getObjectId(e);
    const thisTask = getTaskObjById(taskId);
-   taskCardElements.spaceTitle.textContent = thisTask.space;
+   taskCardElements.spaceTitle.textContent = thisTask.spaceTitle;
    taskCardElements.taskTitle.textContent = thisTask.title;
    taskCardElements.taskPriority.textContent = getPriorityEmoji(thisTask);
    taskCardElements.taskDueDate.textContent = thisTask.dueDate;
@@ -99,12 +118,13 @@ function DOMdisplayTaskRow(taskObj, container){
     const newTask = taskObj;
     const taskRow = document.createElement("div");
     taskRow.classList.add("task-row");
-    // taskRow.onclick=DOMdisplayTaskInfo;
+    taskRow.onclick=DOMdisplayTaskInfo;
 
     const leftContainer = document.createElement("div");
 
     const doneBtn = document.createElement("button");
     doneBtn.classList.add("done-btn");
+    doneBtn.onclick = handleTaskDoneClick;
 
     const taskName = document.createElement("div");
     taskName.classList.add("task-name");
@@ -170,6 +190,7 @@ function findRowTickContainer(tickContainer, taskId){
 }
 //add text crossed
 function handleTaskDoneClick(e){
+    e.stopPropagation();
     const clickedTickContainer = e.target;
     const taskId = getObjectId(e);
     const thisTask = getTaskObjById(taskId);
@@ -198,6 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
 
 function deleteTaskFromDOM(e){
+    e.stopPropagation();
     const taskId = getObjectId(e);
     const taskContainer = document.querySelector(`.task-row[data-id="${taskId}"]`)
     if (taskContainer){
@@ -217,9 +239,67 @@ function deleteSpaceFromDOM(e){
     }
 }
 function deleteSpace(e){
+    e.stopPropagation();
     deleteSpaceObj(e);
     deleteSpaceFromDOM(e);
+    updateSpaceSelectOptions();
 }
 
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace}
+// function deleteSpaceTasks(){
+//     const tasks = getTasksObj();
+//     tasks.forEach(task => {
+//         if (Number(task.spaceId) === Number(spaceId)){
+//             DOMdisplayTaskRow(task, tasksContainer)
+//             }
+//         })
+// }
+
+function updateSpaceSelectOptions(){
+    const spaces = getSpacesObj();
+    const defaultOption = taskSpaceSelect.querySelector('option[disabled]');
+    taskSpaceSelect.innerHTML = '';
+    taskSpaceSelect.appendChild(defaultOption);
+        spaces.forEach(space => {
+            console.log(space.isSelectLabel)
+            if (space.isSelectLabel === true){
+                const taskSpace = document.createElement("option");
+                taskSpace.textContent= `${space.icon} ${space.title}`;
+                taskSpace.value = space.id;
+                taskSpaceSelect.append(taskSpace);
+            }
+            })
+}
+
+function DOMdisplayTasks(e, spaceId = false){
+    if(spaceId === false){
+        spaceId = getObjectId(e);
+    }
+    tasksContainer.innerHTML="";
+    const tasks = getTasksObj();
+    const today = new Date;
+    if(Number(spaceId) === 1){
+        tasks.forEach(task => {DOMdisplayTaskRow(task, tasksContainer)})
+    }
+    else if(Number(spaceId) === 2){
+        tasks.forEach(task => {
+            if (String(task.date) === String(today)){
+                DOMdisplayTaskRow(task, tasksContainer)
+                }
+            })
+    }
+    // else if(Number(spaceId) === 3){
+
+    // }
+    // else if(Number(spaceId) === 4){
+
+    // }
+    else{
+        tasks.forEach(task => {
+            if (Number(task.spaceId) === Number(spaceId)){
+                DOMdisplayTaskRow(task, tasksContainer)
+                }
+            })
+    }    
+}
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasks}
 
