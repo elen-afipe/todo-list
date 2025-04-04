@@ -8,6 +8,7 @@ import { Picker } from 'emoji-picker-element';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
 // import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
+import {getOpenedSpaceId} from "./viewer-functions.js"
 import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks} from "./dom-manipulation";
 import { createSpaceObject } from "./spaces";
 import { createTaskObject } from "./tasks";
@@ -108,21 +109,21 @@ const allSpace = createSpaceObject("All", "📚️", true);
 const todaySpace = createSpaceObject("Today", "📝", false);
 const weekSpace = createSpaceObject("Week", "📑", false);
 const monthSpace = createSpaceObject("Month", "📆", false);
-
+const doneSpace = createSpaceObject("Done", "✅️", false);
 DOMdisplayDefaultSpace(allSpace, filteredSpaces);
 DOMdisplayDefaultSpace(todaySpace, filteredSpaces);
 DOMdisplayDefaultSpace(weekSpace, filteredSpaces);
 DOMdisplayDefaultSpace(monthSpace, filteredSpaces);
-
+DOMdisplayDefaultSpace(doneSpace, filteredSpaces);
 const mySpace = createSpaceObject("My project", "👾", true);
 DOMdisplayCustomSpace(mySpace, customSpaces);
 
 
-const task0 = createTaskObject("MAKE CREATING TASKS WORK", "18/09/08", "high", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+const task0 = createTaskObject("MAKE CREATING TASKS WORK", "2025-04-02", "high", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 // DOMdisplayTaskRow(task0, tasksContainer)
-const task1 = createTaskObject("Think of project logic", "17/09/08", "high", "Just another project", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+const task1 = createTaskObject("Think of project logic", "2025-04-05", "high", "Just another project", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 // DOMdisplayTaskRow(task1, tasksContainer)
-const task2 = createTaskObject("Gather assets", "18/09/08", "medium", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+const task2 = createTaskObject("Gather assets", "2025-04-06", "medium", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 // DOMdisplayTaskRow(task2, tasksContainer)
 
 
@@ -327,7 +328,8 @@ const taskDialog = document.createElement("dialog");
         // console.log(taskPrioritySelect.value)
         const selectedSpace = taskSpaceSelect.options[taskSpaceSelect.selectedIndex];
         const newTask = createTaskObject(taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
-        // DOMdisplayTasks(e, selectedSpace.value);
+        const openedSpaceId = getOpenedSpaceId();
+        DOMdisplayTasks(e, openedSpaceId);
         taskForm.reset();
         taskDialog.close();
     })
@@ -429,6 +431,11 @@ spaceDialog.classList.add("space-form");
     spaceFormContent.append(spaceFormCloseBtn, spaceForm)
     spaceDialog.append(spaceFormContent)
     body.append(spaceDialog);
+
+document.addEventListener('DOMContentLoaded', (e)=>{  
+const currentSpaceId = getOpenedSpaceId();
+DOMdisplayTasks(e, currentSpaceId);
+})
 
 export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect}
 

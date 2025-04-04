@@ -2,10 +2,11 @@ import editIcon from "./icons/edit.svg";
 import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
-import {getObjectId} from "./viewer-functions.js"
+import {getObjectId, updateOpenedSpaceId} from "./viewer-functions.js"
 import {getTasksObj, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols} from "./tasks.js"
 import { getSpacesObj, deleteSpaceObj } from "./spaces.js";
 import {taskCardElements, taskSpaceSelect, tasksContainer} from "./dom-content.js"
+import {format, startOfWeek, endOfWeek, eachDayOfInterval, getWeek } from "date-fns"
 const body = document.querySelector("body");
 
 function DOMdisplayDefaultSpace(spaceObj, container){
@@ -23,7 +24,11 @@ function DOMdisplayDefaultSpace(spaceObj, container){
     spaceTitle.textContent= newSpace.title;
     spaceLogo.append(spaceIcon, spaceTitle)
     spaceRow.append(spaceLogo)
-    spaceRow.onclick=DOMdisplayTasks;
+    spaceRow.addEventListener("click", (e)=>{
+        updateOpenedSpaceId(e);
+        DOMdisplayTasks(e);
+    }
+  )
     spacesContainer.append(spaceRow);
 }
 
@@ -57,6 +62,7 @@ function DOMdisplayCustomSpace(spaceObj, container){
     deleteSpaceBtn.title = "Delete Space";
     deleteSpaceBtn.addEventListener("click", (e)=>{
         deleteSpace(e); 
+        deleteObjTasksFromSpace(e);
         DOMdisplayTasks(e, 1);
     })
     const deleteSpaceIcon = document.createElement("img");
@@ -67,21 +73,11 @@ function DOMdisplayCustomSpace(spaceObj, container){
     spaceLogo.append(spaceIcon, spaceTitle)
     spaceRow.append(spaceLogo, spaceBtns)
     spaceRow.dataset.id = spaceObj.id;
-    spaceRow.onclick=DOMdisplayTasks;
-    // spaceRow.addEventListener("click", 
-    //     DOMdisplayTasks
-    // //     ()=>{
-    // //     tasksContainer.innerHTML="";
-    // //    const tasks = getTasksObj();
-    // // //    console.log(spaceRow.dataset.id)
-    // //    tasks.forEach(task => {
-    // //     if (Number(task.spaceId) === Number(spaceRow.dataset.id)){
-    // //         DOMdisplayTaskRow(task, tasksContainer)
-    // //         }
-    // //     })
-    // // }
-    // )
-    
+    spaceRow.addEventListener("click", (e)=>{
+        updateOpenedSpaceId(e);
+        DOMdisplayTasks(e);
+    }
+  )
     spacesContainer.append(spaceRow);
 }
 function DOMdisplayTaskInfo(e){
@@ -90,11 +86,15 @@ function DOMdisplayTaskInfo(e){
    const thisTask = getTaskObjById(taskId);
    taskCardElements.spaceTitle.textContent = thisTask.spaceTitle;
    taskCardElements.taskTitle.textContent = thisTask.title;
+   crossOutTaskTitle(thisTask, taskCardElements.taskTitle)
    taskCardElements.taskPriority.textContent = getPriorityEmoji(thisTask);
-   taskCardElements.taskDueDate.textContent = thisTask.dueDate;
+   taskCardElements.taskDueDate.textContent = styleDueDate(thisTask.dueDate);
    taskCardElements.taskDescription.textContent = thisTask.description;
    taskCardElements.taskCard.dataset.id = thisTask.id;
    taskCardElements.doneBtn.textContent = (thisTask.doneStatus === false) ? " " : "✓";
+   taskCardElements.doneBtn.addEventListener("click", ()=>{
+    crossOutTaskTitle(thisTask, taskCardElements.taskTitle)
+   })
    taskCardElements.taskCard.showModal();
     }
 
@@ -124,17 +124,19 @@ function DOMdisplayTaskRow(taskObj, container){
 
     const doneBtn = document.createElement("button");
     doneBtn.classList.add("done-btn");
+    doneBtn.textContent = (newTask.doneStatus === true) ? "✓" : "";
     doneBtn.onclick = handleTaskDoneClick;
 
     const taskName = document.createElement("div");
     taskName.classList.add("task-name");
     taskName.textContent= newTask.title;
+    crossOutTaskTitle(newTask, taskName);
     leftContainer.append(doneBtn, taskName);
 
     const rightContainer = document.createElement("div");
 
     const dueDate = document.createElement("div");
-    dueDate.textContent = newTask.dueDate;
+    dueDate.textContent = styleDueDate(newTask.dueDate);
     dueDate.classList.add("task-date");
 
     const priority = document.createElement("div");
@@ -174,6 +176,15 @@ function DOMdisplayTaskRow(taskObj, container){
     taskRow.append(leftContainer, rightContainer)
     taskRow.dataset.id = taskObj.id;
     tasksContainer.append(taskRow);
+}
+
+function crossOutTaskTitle(task, titleElement){
+    const taskIsDone = task.doneStatus;
+    if (taskIsDone){
+        titleElement.style.textDecoration = 'line-through';
+    } else{
+        titleElement.style.textDecoration = 'none';
+    }   
 }
 
 function findRowTickContainer(tickContainer, taskId){
@@ -245,14 +256,17 @@ function deleteSpace(e){
     updateSpaceSelectOptions();
 }
 
-// function deleteSpaceTasks(){
-//     const tasks = getTasksObj();
-//     tasks.forEach(task => {
-//         if (Number(task.spaceId) === Number(spaceId)){
-//             DOMdisplayTaskRow(task, tasksContainer)
-//             }
-//         })
-// }
+
+function deleteObjTasksFromSpace(e) {
+    const spaceId = getObjectId(e);
+    const tasks = getTasksObj();
+    for (let i = tasks.length - 1; i >= 0; i--) {
+        if (Number(tasks[i].spaceId) === Number(spaceId)) {
+            tasks.splice(i, 1);
+        }
+    }
+}
+
 
 function updateSpaceSelectOptions(){
     const spaces = getSpacesObj();
@@ -276,23 +290,45 @@ function DOMdisplayTasks(e, spaceId = false){
     }
     tasksContainer.innerHTML="";
     const tasks = getTasksObj();
-    const today = new Date;
+    const today = new Date();
+    const todayFormatted = format(today, 'yyyy-MM-dd')
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // 1 = Monday
+    const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+    const weekDays = eachDayOfInterval({
+        start: weekStart,
+        end: weekEnd
+      }).map(day => format(day, 'yyyy-MM-dd'));
     if(Number(spaceId) === 1){
         tasks.forEach(task => {DOMdisplayTaskRow(task, tasksContainer)})
     }
     else if(Number(spaceId) === 2){
         tasks.forEach(task => {
-            if (String(task.date) === String(today)){
+            if (String(task.dueDate) === String(todayFormatted)){
                 DOMdisplayTaskRow(task, tasksContainer)
                 }
             })
     }
-    // else if(Number(spaceId) === 3){
-
-    // }
-    // else if(Number(spaceId) === 4){
-
-    // }
+    else if(Number(spaceId) === 3){
+        tasks.forEach(task => {
+            if (weekDays.includes(String(task.dueDate))){
+                DOMdisplayTaskRow(task, tasksContainer)
+                }
+            })
+    }
+    else if(Number(spaceId) === 4){
+        tasks.forEach(task => {
+            if (String(task.dueDate).substring(5,7) === String(todayFormatted).substring(5,7)){
+                DOMdisplayTaskRow(task, tasksContainer)
+                }
+            })
+    }
+    else if(Number(spaceId) === 5){
+        tasks.forEach(task => {
+            if (Number(task.doneStatus === true)){
+                DOMdisplayTaskRow(task, tasksContainer)
+                }
+            })
+    }   
     else{
         tasks.forEach(task => {
             if (Number(task.spaceId) === Number(spaceId)){
@@ -301,5 +337,13 @@ function DOMdisplayTasks(e, spaceId = false){
             })
     }    
 }
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasks}
+
+function styleDueDate(date){
+    const year = date.substring(0, 4);
+    const month = date.substring(5, 7);
+    const day = date.substring(8, 10)
+    return `${day}.${month}.${year}`
+}
+
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasks, deleteObjTasksFromSpace}
 

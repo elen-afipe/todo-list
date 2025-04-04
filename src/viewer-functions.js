@@ -11,4 +11,17 @@ function getObjectId(e){
    const id = parentNode.getAttribute('data-id');
     return id;
 }
-export {getObjectId}
+
+let openedSpaceId = 1;
+
+function getOpenedSpaceId(){
+  return openedSpaceId;
+}
+
+function updateOpenedSpaceId(e){
+    const clickedSpaceId = getObjectId(e);
+    openedSpaceId = clickedSpaceId;
+    return openedSpaceId;
+}
+
+export {getObjectId, getOpenedSpaceId, updateOpenedSpaceId}

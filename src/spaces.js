@@ -3,9 +3,9 @@ import {getObjectId} from "./viewer-functions.js"
 const Spaces = [];
 function Space(spaceTitle, spaceIcon, isSelectLabel){
     this.title = spaceTitle; // string
-    this.icon = spaceIcon; // emoji or svg or number 
+    this.icon = spaceIcon; // emoji 
     this.isSelectLabel = isSelectLabel ? true : false;
-    this.tasks = []; // array with tasks id
+    // this.tasks = []; // array with tasks id
     this.id = generateSpaceId(); // id
 }
 function getSpacesObj(){
