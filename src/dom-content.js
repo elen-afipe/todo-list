@@ -8,9 +8,9 @@ import { Picker } from 'emoji-picker-element';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
 // import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
-import {getOpenedSpaceId} from "./viewer-functions.js"
-import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks} from "./dom-manipulation";
-import { createSpaceObject } from "./spaces";
+import {getOpenedSpaceId, getInfoMode, setInfoMode} from "./viewer-functions.js"
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks, openAddSpaceForm, DOMdisplayCustomSpaces} from "./dom-manipulation";
+import { createSpaceObject, editSpaceObj} from "./spaces";
 import { createTaskObject } from "./tasks";
 import {getTaskPrioritySymbols} from "./tasks.js"
 const body = document.querySelector("body");
@@ -99,23 +99,23 @@ addSpaceBtn.title = "Add New Space";
 const addSpaceSVG = document.createElement("img");
 addSpaceSVG.src = addIcon;
 addSpaceBtn.append(addSpaceSVG)
-addSpaceBtn.addEventListener("click", ()=> {spaceDialog.showModal()})
+addSpaceBtn.onclick=openAddSpaceForm;
 sidebar.append(filteredSpaces, customSpaces, addSpaceBtn);
 main.append(sidebar, todoContainer)
 body.append(nav, main)
 
 
-const allSpace = createSpaceObject("All", "📚️", true);
-const todaySpace = createSpaceObject("Today", "📝", false);
-const weekSpace = createSpaceObject("Week", "📑", false);
-const monthSpace = createSpaceObject("Month", "📆", false);
-const doneSpace = createSpaceObject("Done", "✅️", false);
+const allSpace = createSpaceObject("All", "📚️", true, false);
+const todaySpace = createSpaceObject("Today", "📝", false, false);
+const weekSpace = createSpaceObject("Week", "📑", false, false);
+const monthSpace = createSpaceObject("Month", "📆", false, false);
+const doneSpace = createSpaceObject("Done", "✅️", false, false);
 DOMdisplayDefaultSpace(allSpace, filteredSpaces);
 DOMdisplayDefaultSpace(todaySpace, filteredSpaces);
 DOMdisplayDefaultSpace(weekSpace, filteredSpaces);
 DOMdisplayDefaultSpace(monthSpace, filteredSpaces);
 DOMdisplayDefaultSpace(doneSpace, filteredSpaces);
-const mySpace = createSpaceObject("My project", "👾", true);
+const mySpace = createSpaceObject("My project", "👾", true, true);
 DOMdisplayCustomSpace(mySpace, customSpaces);
 
 
@@ -418,11 +418,18 @@ spaceDialog.classList.add("space-form");
     spaceFormBtn.textContent="Add space"
     spaceFormBtn.addEventListener("click", (e)=>{
         e.preventDefault();
+        const infoMode = getInfoMode();
         // ADD INPUT CHECKS
         const icon = spaceIconInput.value ? spaceIconInput.value : "📄";
-        const newSpace = createSpaceObject(spaceTitleInput.value, icon, true);
+        if (infoMode === "add"){
+            createSpaceObject(spaceTitleInput.value, icon, true, true);
+        } else{
+            editSpaceObj(e, spaceTitleInput.value, spaceIconInput.value)
+        }
+        
+        DOMdisplayCustomSpaces();
         updateSpaceSelectOptions();
-        DOMdisplayCustomSpace(newSpace, customSpaces);
+        
         spaceForm.reset();
         spaceDialog.close();
     })
@@ -437,5 +444,5 @@ const currentSpaceId = getOpenedSpaceId();
 DOMdisplayTasks(e, currentSpaceId);
 })
 
-export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect}
+export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm}
 

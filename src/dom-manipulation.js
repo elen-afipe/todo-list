@@ -2,10 +2,10 @@ import editIcon from "./icons/edit.svg";
 import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
-import {getObjectId, updateOpenedSpaceId} from "./viewer-functions.js"
+import {getInfoMode, getObjectId, setInfoMode, updateOpenedSpaceId} from "./viewer-functions.js"
 import {getTasksObj, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols} from "./tasks.js"
-import { getSpacesObj, deleteSpaceObj } from "./spaces.js";
-import {taskCardElements, taskSpaceSelect, tasksContainer} from "./dom-content.js"
+import { getSpacesObj, deleteSpaceObj, getSpaceByIndex, getSpaceIndex} from "./spaces.js";
+import {taskCardElements, taskSpaceSelect, tasksContainer, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, customSpaces} from "./dom-content.js"
 import {format, startOfWeek, endOfWeek, eachDayOfInterval, getWeek } from "date-fns"
 const body = document.querySelector("body");
 
@@ -55,7 +55,7 @@ function DOMdisplayCustomSpace(spaceObj, container){
     const editSpaceIcon = document.createElement("img");
     editSpaceIcon.src= editIcon;
     editSpaceBtn.append(editSpaceIcon);
-    // editSpaceBtn.addEventListener
+    editSpaceBtn.onclick=openEditSpaceForm;
     const deleteSpaceBtn = document.createElement("button");
     deleteSpaceBtn.classList.add("delete-space", "btn", "svg");
     deleteSpaceBtn.ariaLabel="Delete Space";
@@ -80,6 +80,17 @@ function DOMdisplayCustomSpace(spaceObj, container){
   )
     spacesContainer.append(spaceRow);
 }
+
+function DOMdisplayCustomSpaces(){
+    customSpaces.innerHTML="";
+    const spaces = getSpacesObj();
+    spaces.forEach(space => {
+        if (space.isCustom){
+            DOMdisplayCustomSpace(space, customSpaces)
+        }
+    })
+}
+
 function DOMdisplayTaskInfo(e){
     e.stopPropagation();
    const taskId =  getObjectId(e);
@@ -345,5 +356,38 @@ function styleDueDate(date){
     return `${day}.${month}.${year}`
 }
 
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasks, deleteObjTasksFromSpace}
+function preloadSpaceInputs(e){
+    const spaceIndex = getSpaceIndex(e);
+    const thisSpace = getSpaceByIndex(spaceIndex);
+    spaceTitleInput.value = thisSpace.title;
+    spaceIconInput.value = thisSpace.icon;
+}
+
+function openEditSpaceForm(e){
+    setInfoMode("edit");
+    spaceFormLegend.textContent="Up for a change?"; 
+    spaceFormBtn.textContent="Edit space";
+    const spaceId = getObjectId(e);
+    spaceDialog.dataset.id = spaceId;
+    preloadSpaceInputs(e);
+    spaceDialog.showModal();
+}
+
+function openAddSpaceForm(){
+    setInfoMode("add");
+    spaceForm.reset();
+    spaceFormLegend.textContent="Create space for your tasks"; 
+    spaceFormBtn.textContent="Add space";
+    spaceDialog.showModal();
+}
+
+// function editSpaceInDom(e){
+//     const spaceIndex = getSpaceIndex(e);
+//     const spaceObj = getSpaceByIndex(spaceIndex);
+//     const spaceId = getObjectId(e);
+//     const spaceContainer = document.querySelector(`.space-row[data-id="${spaceId}"]`)
+
+// }
+
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasks, deleteObjTasksFromSpace, openAddSpaceForm, DOMdisplayCustomSpaces}
 

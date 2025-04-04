@@ -13,7 +13,6 @@ function getObjectId(e){
 }
 
 let openedSpaceId = 1;
-
 function getOpenedSpaceId(){
   return openedSpaceId;
 }
@@ -24,4 +23,13 @@ function updateOpenedSpaceId(e){
     return openedSpaceId;
 }
 
-export {getObjectId, getOpenedSpaceId, updateOpenedSpaceId}
+let infoMode = "add";
+function getInfoMode(){
+  return infoMode;
+}
+
+function setInfoMode(mode){
+ infoMode = mode;
+}
+
+export {getObjectId, getOpenedSpaceId, updateOpenedSpaceId, getInfoMode, setInfoMode}

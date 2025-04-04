@@ -1,10 +1,11 @@
 import {getObjectId} from "./viewer-functions.js"
 
 const Spaces = [];
-function Space(spaceTitle, spaceIcon, isSelectLabel){
+function Space(spaceTitle, spaceIcon, isSelectLabel, isCustom){
     this.title = spaceTitle; // string
     this.icon = spaceIcon; // emoji 
     this.isSelectLabel = isSelectLabel ? true : false;
+    this.isCustom = isCustom ? true : false;
     // this.tasks = []; // array with tasks id
     this.id = generateSpaceId(); // id
 }
@@ -12,8 +13,8 @@ function getSpacesObj(){
     return Spaces;
 }
 
-function createSpaceObject(spaceTitle, spaceIcon, isSelectLabel){
-    const newSpace = new Space(spaceTitle, spaceIcon, isSelectLabel);
+function createSpaceObject(spaceTitle, spaceIcon, isSelectLabel, isCustom){
+    const newSpace = new Space(spaceTitle, spaceIcon, isSelectLabel, isCustom);
     addSpaceToSpaces(newSpace)
     return newSpace;
 }
@@ -41,6 +42,10 @@ function getSpaceIndex(e){
       return index;
 }
 
+function getSpaceByIndex(index){
+    const spaces = getSpacesObj();
+    return spaces[index];
+}
 function deleteSpaceObj(e){
     const spaceIndex = getSpaceIndex(e)
     const spaces = getSpacesObj();
@@ -49,4 +54,11 @@ function deleteSpaceObj(e){
     }
 }
 
-export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj}
+function editSpaceObj(e, newTitle, newIcon){
+    const spaceIndex = getSpaceIndex(e);
+    const thisSpace = getSpaceByIndex(spaceIndex);
+    thisSpace.title = newTitle;
+    thisSpace.icon = newIcon;
+}
+
+export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj, getSpaceByIndex, getSpaceIndex, editSpaceObj}
