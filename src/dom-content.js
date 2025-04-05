@@ -8,13 +8,19 @@ import { Picker } from 'emoji-picker-element';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
 // import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
-import {getOpenedSpaceId, getInfoMode, setInfoMode} from "./viewer-functions.js"
-import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks, openAddSpaceForm, DOMdisplayCustomSpaces} from "./dom-manipulation";
-import { createSpaceObject, editSpaceObj} from "./spaces";
-import { createTaskObject } from "./tasks";
+import {getOpenedSpaceId, getInfoMode, setInfoMode, storageAvailable, saveToLocalStorage, getFromLocalStorage, getNumberOfTasks} from "./viewer-functions.js"
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm} from "./dom-manipulation";
+import { createSpaceObject, editSpaceObj, getSpacesObj, addSpaceToSpaces, getCurrentSpaceId, initializeSpaceId} from "./spaces";
+import { createTaskObject, editTaskObj, getTasksObj, addTaskToTasks, initializeTaskId} from "./tasks";
 import {getTaskPrioritySymbols} from "./tasks.js"
+
+initializeTaskId();
+
+let openedSpaceId = getOpenedSpaceId();
+let currentSpaceId = getCurrentSpaceId();
 const body = document.querySelector("body");
 
+// localStorage.clear();
 // navigation
 const nav = document.createElement("nav");
 nav.classList.add("navigation");
@@ -61,13 +67,6 @@ const taskRow1 = document.createElement("div");
 taskRow1.classList.add("task-row", "first");
 const tasksCounterContainer = document.createElement("div");
 tasksCounterContainer.classList.add("counter-container");
-// const tasksCounterHead = document.createElement
-
-const tasksCounter = document.createElement("span");
-tasksCounter.classList.add("tasks-counter");
-tasksCounter.textContent="0";
-
-tasksCounterContainer.appendChild(tasksCounter);
 taskRow1.appendChild(tasksCounterContainer);
 
 const tasksContainer = document.createElement("div");
@@ -80,7 +79,7 @@ addTaskBtn.title = "Add New Task";
 const addTaskSVG = document.createElement("img");
 addTaskSVG.src = addIcon;
 addTaskBtn.append(addTaskSVG);
-addTaskBtn.addEventListener("click", ()=> {taskDialog.showModal()})
+addTaskBtn.onclick=openAddTaskForm;
 todoContainer.append(headerRow, taskRow1, tasksContainer, addTaskBtn)
 
 // sidebar
@@ -104,28 +103,18 @@ sidebar.append(filteredSpaces, customSpaces, addSpaceBtn);
 main.append(sidebar, todoContainer)
 body.append(nav, main)
 
-
-const allSpace = createSpaceObject("All", "📚️", true, false);
-const todaySpace = createSpaceObject("Today", "📝", false, false);
-const weekSpace = createSpaceObject("Week", "📑", false, false);
-const monthSpace = createSpaceObject("Month", "📆", false, false);
-const doneSpace = createSpaceObject("Done", "✅️", false, false);
+const allSpace = createSpaceObject("All", "📚️", true, false, 1);
+const todaySpace = createSpaceObject("Today", "📝", false, false, 2);
+const weekSpace = createSpaceObject("Week", "📑", false, false, 3);
+const monthSpace = createSpaceObject("Month", "📆", false, false, 4);
+const doneSpace = createSpaceObject("Done", "✅️", false, false, 5);
 DOMdisplayDefaultSpace(allSpace, filteredSpaces);
 DOMdisplayDefaultSpace(todaySpace, filteredSpaces);
 DOMdisplayDefaultSpace(weekSpace, filteredSpaces);
 DOMdisplayDefaultSpace(monthSpace, filteredSpaces);
 DOMdisplayDefaultSpace(doneSpace, filteredSpaces);
-const mySpace = createSpaceObject("My project", "👾", true, true);
-DOMdisplayCustomSpace(mySpace, customSpaces);
-
-
-const task0 = createTaskObject("MAKE CREATING TASKS WORK", "2025-04-02", "high", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-// DOMdisplayTaskRow(task0, tasksContainer)
-const task1 = createTaskObject("Think of project logic", "2025-04-05", "high", "Just another project", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-// DOMdisplayTaskRow(task1, tasksContainer)
-const task2 = createTaskObject("Gather assets", "2025-04-06", "medium", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-// DOMdisplayTaskRow(task2, tasksContainer)
-
+//initialize minimal id after creating filters with permanent id
+initializeSpaceId();
 
 // task info card dialog
 const taskCard = document.createElement("dialog");
@@ -143,6 +132,10 @@ const taskCard = document.createElement("dialog");
     editTaskBtn.classList.add("edit-task", "svg","btn");
     editTaskBtn.ariaLabel="Edit Task";
     editTaskBtn.title = "Edit Task";
+    editTaskBtn.addEventListener("click", (e)=> {
+        openEditTaskForm(e);
+        taskCard.close();
+    });
     const editTaskIcon = document.createElement("img");
     editTaskIcon.src= editIcon;
     editTaskBtn.append(editTaskIcon);
@@ -157,6 +150,9 @@ const taskCard = document.createElement("dialog");
     deleteTaskBtn.addEventListener("click", (e)=>{
         deleteTask(e);
         taskCard.close();
+        const tasks = getTasksObj();
+        saveToLocalStorage("tasks", tasks, true);
+        DOMdisplayTasks(e);
     })
     
     const closeTaskInfoBtn = document.createElement("button");
@@ -325,11 +321,18 @@ const taskDialog = document.createElement("dialog");
     taskFormBtn.textContent="Add task";
     taskFormBtn.addEventListener("click", (e)=>{
         e.preventDefault();
-        // console.log(taskPrioritySelect.value)
+        const infoMode = getInfoMode();
         const selectedSpace = taskSpaceSelect.options[taskSpaceSelect.selectedIndex];
-        const newTask = createTaskObject(taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
+        console.log(selectedSpace)
+        if (infoMode === "add"){
+            createTaskObject(taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
+        } else{
+            editTaskObj(e, taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
+        }
         const openedSpaceId = getOpenedSpaceId();
         DOMdisplayTasks(e, openedSpaceId);
+        const tasks = getTasksObj();
+        saveToLocalStorage("tasks", tasks, true);
         taskForm.reset();
         taskDialog.close();
     })
@@ -417,6 +420,7 @@ spaceDialog.classList.add("space-form");
     spaceFormBtn.classList.add("space-form-btn")
     spaceFormBtn.textContent="Add space"
     spaceFormBtn.addEventListener("click", (e)=>{
+        e.stopPropagation();
         e.preventDefault();
         const infoMode = getInfoMode();
         // ADD INPUT CHECKS
@@ -429,7 +433,8 @@ spaceDialog.classList.add("space-form");
         
         DOMdisplayCustomSpaces();
         updateSpaceSelectOptions();
-        
+        const spaces = getSpacesObj();
+        saveToLocalStorage("spaces", spaces, true);
         spaceForm.reset();
         spaceDialog.close();
     })
@@ -439,10 +444,57 @@ spaceDialog.classList.add("space-form");
     spaceDialog.append(spaceFormContent)
     body.append(spaceDialog);
 
+    if(storageAvailable("localStorage")){
+        const spacesObj = getSpacesObj();
+        console.log(spacesObj)
+        const tasksObj = getTasksObj();
+        console.log(tasksObj)
+        const savedSpaces = getFromLocalStorage("spaces", true);
+        const savedTasks = getFromLocalStorage("tasks", true);
+        const savedNumberOfTasks = getFromLocalStorage("tasks-num", false);
+        const savedOpenedSpaceId = getFromLocalStorage("space-id", false);
+        const savedCurrentSpaceId = getFromLocalStorage("current-space", false)
+        currentSpaceId = savedCurrentSpaceId;
+        if (savedSpaces !== null && savedTasks !== null && savedNumberOfTasks !== null && savedOpenedSpaceId !== null ){
+            Object.values(savedSpaces).forEach(space => {
+                if (space.isCustom){
+                    addSpaceToSpaces(space)
+                    DOMdisplayCustomSpace(space, customSpaces)
+                }
+              });
+              Object.values(savedTasks).forEach(task => {
+                addTaskToTasks(task)
+              });
+              openedSpaceId = savedOpenedSpaceId;
+              updateSpaceSelectOptions();
+        } else {
+    // create default ones, save them and display
+        const mySpace = createSpaceObject("My project", "👾", true, true);
+        DOMdisplayCustomSpace(mySpace, customSpaces);
+        const mySSpace = createSpaceObject("Leisure", "👾", true, true);
+        DOMdisplayCustomSpace(mySSpace, customSpaces);
+
+        createTaskObject("MAKE CREATING TASKS WORK", "2025-04-02", "high", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+        createTaskObject("Think of project logic", "2025-04-05", "high", "Just another project", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+        createTaskObject("Gather assets", "2025-04-06", "medium", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+        
+        const spaces = getSpacesObj();
+        saveToLocalStorage("spaces", spaces, true);
+        
+        const tasks = getTasksObj();
+        saveToLocalStorage("tasks", tasks, true);
+    
+        const numberOfTasks = getNumberOfTasks();
+        saveToLocalStorage("tasks-num", numberOfTasks, false);
+    
+        const openedSpaceId = getOpenedSpaceId();
+        saveToLocalStorage("space-id", openedSpaceId, false);
+        updateSpaceSelectOptions();
+        }
+    }
+
 document.addEventListener('DOMContentLoaded', (e)=>{  
-const currentSpaceId = getOpenedSpaceId();
-DOMdisplayTasks(e, currentSpaceId);
+DOMdisplayTasks(e, openedSpaceId);
 })
 
-export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm}
-
+export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer}

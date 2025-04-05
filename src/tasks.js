@@ -1,5 +1,6 @@
 
 import {getObjectId} from "./viewer-functions.js"
+import { getFromLocalStorage, saveToLocalStorage } from "./viewer-functions.js";
 const TasksObj = [];
 function Task(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpaceTitle, taskSpaceId){
     this.title = taskTitle;
@@ -26,8 +27,27 @@ function getTasksObj(){
 }
 
 let currentTaskId = 0;
+
+function initializeTaskId() {
+    const savedId = getFromLocalStorage("task-id", false);
+    const tasks = getTasksObj();
+    let highestId = 0;
+    
+    if (tasks) {
+      Object.values(tasks).forEach(task => {
+        if (task.id > highestId) {
+          highestId = Number(task.id);
+        }
+      });
+    }
+    currentTaskId = Math.max(
+      savedId ? Number(savedId) : 0,
+      highestId
+    );
+  }
 function generateTaskId(){
     currentTaskId+=1;
+    saveToLocalStorage("task-id", currentTaskId, false)
     return currentTaskId;
 }
 function createTaskObject(taskTitle, taskDueDate, taskPriority, taskDescription, taskSpaceTitle, taskSpaceId){
@@ -64,6 +84,10 @@ function getTaskIndex(e){
     return index;
 }
 
+function getTaskByIndex(index){
+    const tasks = getTasksObj();
+    return tasks[index];
+}
 
 function deleteTaskObj(e){
     const taskIndex = getTaskIndex(e);
@@ -75,10 +99,21 @@ function deleteTaskObj(e){
         console.log(tasks);
     }
 }
+
+function editTaskObj(e, newTitle, newDueDate, newPriority, newDescription, newSpaceTitle, newSpaceId){
+    const taskIndex = getTaskIndex(e);
+    const thisTask = getTaskByIndex(taskIndex);
+    thisTask.title = newTitle;
+    thisTask.dueDate = newDueDate;
+    thisTask.priority = newPriority;
+    thisTask.description = newDescription;
+    thisTask.spaceTitle = newSpaceTitle;
+    thisTask.spaceId = newSpaceId;
+}
 // function getNumberOfTasks(space){
 
 // }
-export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols, getTasksObj}
+export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols, getTasksObj, getTaskByIndex, getTaskIndex, editTaskObj, addTaskToTasks, initializeTaskId}
 
 
 

@@ -17,10 +17,14 @@ function getOpenedSpaceId(){
   return openedSpaceId;
 }
 
-function updateOpenedSpaceId(e){
-    const clickedSpaceId = getObjectId(e);
-    openedSpaceId = clickedSpaceId;
-    return openedSpaceId;
+function updateOpenedSpaceId(e, idOfNotOpenedSpace = false){
+  let clickedSpaceId = getObjectId(e);
+  if (idOfNotOpenedSpace !== false){
+    clickedSpaceId = idOfNotOpenedSpace;
+  }
+  openedSpaceId = clickedSpaceId;
+  saveToLocalStorage("space-id", openedSpaceId, false)
+  return openedSpaceId;
 }
 
 let infoMode = "add";
@@ -32,4 +36,53 @@ function setInfoMode(mode){
  infoMode = mode;
 }
 
-export {getObjectId, getOpenedSpaceId, updateOpenedSpaceId, getInfoMode, setInfoMode}
+let numberOfTasks = 0;
+function getNumberOfTasks(){
+  return numberOfTasks;
+}
+
+function setNumberOfTasks(number){
+  numberOfTasks = Number(number);
+}
+
+function storageAvailable(type) {
+  let storage;
+  try {
+    storage = window[type];
+    const x = "__storage_test__";
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (e) {
+    return (
+      e instanceof DOMException &&
+      e.name === "QuotaExceededError" &&
+      storage &&
+      storage.length !== 0
+    );
+  }
+}
+
+function saveToLocalStorage(key, dataToStore, needsJSONConversion){
+  if (needsJSONConversion){
+    localStorage.setItem(`${key}`, JSON.stringify(dataToStore));
+    console.log(JSON.parse(localStorage.getItem(`${key}`)))
+  } else{
+    localStorage.setItem(`${key}`, dataToStore)
+    console.log(localStorage.getItem(`${key}`))
+  }
+}
+
+function getFromLocalStorage(key, needsJSONConversion){
+  if (needsJSONConversion){
+    const data = JSON.parse(localStorage.getItem(`${key}`));
+    return data;
+    console.log(JSON.parse(localStorage.getItem(`${key}`)))
+  } else{
+    const data = localStorage.getItem(`${key}`);
+    return data;
+    console.log(localStorage.getItem(`${key}`))
+  }
+}
+
+export {getObjectId, getOpenedSpaceId, updateOpenedSpaceId, getInfoMode, setInfoMode, getNumberOfTasks, setNumberOfTasks, storageAvailable, saveToLocalStorage, getFromLocalStorage}

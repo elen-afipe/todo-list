@@ -1,20 +1,21 @@
-import {getObjectId} from "./viewer-functions.js"
+import {getObjectId, getFromLocalStorage, saveToLocalStorage} from "./viewer-functions.js"
 
 const Spaces = [];
-function Space(spaceTitle, spaceIcon, isSelectLabel, isCustom){
+function Space(spaceTitle, spaceIcon, isSelectLabel, isCustom, id = false){
+    console.log(id)
     this.title = spaceTitle; // string
     this.icon = spaceIcon; // emoji 
     this.isSelectLabel = isSelectLabel ? true : false;
     this.isCustom = isCustom ? true : false;
     // this.tasks = []; // array with tasks id
-    this.id = generateSpaceId(); // id
+    this.id = id ? id : generateSpaceId(); // id
 }
 function getSpacesObj(){
     return Spaces;
 }
 
-function createSpaceObject(spaceTitle, spaceIcon, isSelectLabel, isCustom){
-    const newSpace = new Space(spaceTitle, spaceIcon, isSelectLabel, isCustom);
+function createSpaceObject(spaceTitle, spaceIcon, isSelectLabel, isCustom, id){
+    const newSpace = new Space(spaceTitle, spaceIcon, isSelectLabel, isCustom, id);
     addSpaceToSpaces(newSpace)
     return newSpace;
 }
@@ -24,8 +25,31 @@ function addSpaceToSpaces(space){
 }
 
 let currentSpaceId = 0;
+function initializeSpaceId() {
+    const savedId = getFromLocalStorage("current-space", false);
+    const spaces = getSpacesObj();
+    let highestId = 0;
+    
+    if (spaces) {
+      Object.values(spaces).forEach(space => {
+        if (space.id > highestId) {
+          highestId = Number(space.id);
+        }
+      });
+    }
+    currentSpaceId = Math.max(
+      savedId ? Number(savedId) : 0,
+      highestId
+    );
+  }
+
+function getCurrentSpaceId(){
+    return currentSpaceId;
+}
+
 function generateSpaceId(){
     currentSpaceId+=1;
+    saveToLocalStorage("current-space", currentSpaceId, false)
     return currentSpaceId;
 }
 
@@ -61,4 +85,4 @@ function editSpaceObj(e, newTitle, newIcon){
     thisSpace.icon = newIcon;
 }
 
-export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj, getSpaceByIndex, getSpaceIndex, editSpaceObj}
+export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj, getSpaceByIndex, getSpaceIndex, editSpaceObj, getCurrentSpaceId, initializeSpaceId}
