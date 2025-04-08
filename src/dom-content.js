@@ -9,7 +9,7 @@ import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
 // import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
 import {getOpenedSpaceId, getInfoMode, setInfoMode, storageAvailable, saveToLocalStorage, getFromLocalStorage, getNumberOfTasks} from "./viewer-functions.js"
-import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasks, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm} from "./dom-manipulation";
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasksInfo, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar} from "./dom-manipulation";
 import { createSpaceObject, editSpaceObj, getSpacesObj, addSpaceToSpaces, getCurrentSpaceId, initializeSpaceId} from "./spaces";
 import { createTaskObject, editTaskObj, getTasksObj, addTaskToTasks, initializeTaskId} from "./tasks";
 import {getTaskPrioritySymbols} from "./tasks.js"
@@ -29,6 +29,7 @@ const sideBtn = document.createElement("button");
 sideBtn.classList.add("side-btn", "btn", "svg");
 sideBtn.title="Toggle sidebar";
 sideBtn.ariaLabel="Toggle sidebar";
+sideBtn.onclick = toggleSidebar;
 const sideIcon = document.createElement("img");
 sideIcon.src=sidebarIcon;
 sideBtn.append(sideIcon)
@@ -41,7 +42,7 @@ logoImg.classList.add("logo-img", "svg")
 
 const logoText = document.createElement("div");
 logoText.classList.add("logo-text");
-logoText.textContent="Todo code";
+logoText.textContent="{ ToDoCode }";
 
 logoContainer.append(logoImg, logoText);
 nav.append(sideBtn, logoContainer);
@@ -84,7 +85,7 @@ todoContainer.append(headerRow, taskRow1, tasksContainer, addTaskBtn)
 
 // sidebar
 const sidebar = document.createElement("aside");
-sidebar.classList.add("sidebar");
+sidebar.classList.add("sidebar", "open");
 
 const filteredSpaces = document.createElement("div");
 filteredSpaces.classList.add("space-container")
@@ -99,7 +100,7 @@ const addSpaceSVG = document.createElement("img");
 addSpaceSVG.src = addIcon;
 addSpaceBtn.append(addSpaceSVG)
 addSpaceBtn.onclick=openAddSpaceForm;
-sidebar.append(filteredSpaces, customSpaces, addSpaceBtn);
+sidebar.append(filteredSpaces, addSpaceBtn, customSpaces);
 main.append(sidebar, todoContainer)
 body.append(nav, main)
 
@@ -130,8 +131,8 @@ const taskCard = document.createElement("dialog");
     taskBtns.classList.add("card-btns")
     const editTaskBtn = document.createElement("button");
     editTaskBtn.classList.add("edit-task", "svg","btn");
-    editTaskBtn.ariaLabel="Edit Task";
-    editTaskBtn.title = "Edit Task";
+    editTaskBtn.ariaLabel="Edit task";
+    editTaskBtn.title = "Edit task";
     editTaskBtn.addEventListener("click", (e)=> {
         openEditTaskForm(e);
         taskCard.close();
@@ -152,7 +153,7 @@ const taskCard = document.createElement("dialog");
         taskCard.close();
         const tasks = getTasksObj();
         saveToLocalStorage("tasks", tasks, true);
-        DOMdisplayTasks(e);
+        DOMdisplayTasksInfo(e);
     })
     
     const closeTaskInfoBtn = document.createElement("button");
@@ -193,7 +194,7 @@ const taskCard = document.createElement("dialog");
     
     const taskDueDate = document.createElement("div");
     
-    leftSide.append(taskPriority, taskDueDate)
+    leftSide.append(taskDueDate, taskPriority)
     
     const taskDescription = document.createElement("div");
     taskDescription.classList.add("card-task-description")
@@ -238,12 +239,13 @@ const taskDialog = document.createElement("dialog");
     taskFormRow1.classList.add("form-row");
 
     const taskTitleLabel = document.createElement("label");
-    taskTitleLabel.textContent='Task title';
+    taskTitleLabel.textContent='Title';
     taskTitleLabel.for="task-title";
     const taskTitleInput = document.createElement("input");
     taskTitleInput.id="task-title";
     taskTitleInput.name="task-title";
     taskTitleInput.required="true";
+    taskTitleInput.maxLength = 75;
     taskTitleInput.type="text";
     taskFormRow1.append(taskTitleLabel, taskTitleInput)
 
@@ -275,15 +277,19 @@ const taskDialog = document.createElement("dialog");
     taskPriorityDefault.value="";
     taskPriorityDefault.disabled=true;
     taskPriorityDefault.setAttribute("selected", "");
+    taskPriority.classList.add("select-option");
     const taskPriorityLow = document.createElement("option");
-    taskPriorityLow.textContent=`${taskPrioritySymbols.low} Low`;
+    taskPriorityLow.textContent=`${taskPrioritySymbols.low} I'll get to it when I'm bored`;
     taskPriorityLow.value="low";
+    taskPriorityLow.classList.add("select-option")
     const taskPriorityMed = document.createElement("option");
-    taskPriorityMed.textContent=`${taskPrioritySymbols.medium} Medium`;
+    taskPriorityMed.textContent=`${taskPrioritySymbols.medium} I should probably do this`;
     taskPriorityMed.value="medium";
+    taskPriorityMed.classList.add("select-option");
     const taskPriorityMax = document.createElement("option");
-    taskPriorityMax.textContent=`${taskPrioritySymbols.high} High`;
+    taskPriorityMax.textContent=`${taskPrioritySymbols.high} Why wasn't this done yesterday?!`;
     taskPriorityMax.value="high";
+    taskPriorityMax.classList.add("select-option");
     taskPrioritySelect.append(taskPriorityDefault, taskPriorityLow, taskPriorityMed, taskPriorityMax)
     taskFormRow3.append(taskPriorityLabel, taskPrioritySelect)
 
@@ -291,7 +297,8 @@ const taskDialog = document.createElement("dialog");
     taskFormRow4.classList.add("form-row");
 
     const taskDescLabel = document.createElement("label");
-    taskDescLabel.textContent='Description';
+    taskDescLabel.textContent='Notes';
+    taskDescLabel.classList.add("notes-label");
     taskDescLabel.for="task-description";
     const taskDescInput = document.createElement("textarea");
     taskDescInput.id="task-description";
@@ -312,6 +319,7 @@ const taskDialog = document.createElement("dialog");
     taskSpaceDefault.value="";
     taskSpaceDefault.disabled=true;
     taskSpaceDefault.setAttribute("selected", "");
+    taskSpaceDefault.classList.add("select-option");
     taskSpaceSelect.append(taskSpaceDefault)
     taskFormRow5.append(taskSpaceLabel, taskSpaceSelect)
     updateSpaceSelectOptions();
@@ -322,15 +330,17 @@ const taskDialog = document.createElement("dialog");
     taskFormBtn.addEventListener("click", (e)=>{
         e.preventDefault();
         const infoMode = getInfoMode();
+        const taskTitle = taskTitleInput.value ? taskTitleInput.value : "New task"
         const selectedSpace = taskSpaceSelect.options[taskSpaceSelect.selectedIndex];
-        console.log(selectedSpace)
+        const selectedSpaceId = (selectedSpace.value === "") ? allSpace.id : selectedSpace.value;
+        const selectedSpaceName = (selectedSpace.value === "" | "Select space") ? `${allSpace.icon} ${allSpace.title}` : selectedSpace.textContent;
         if (infoMode === "add"){
-            createTaskObject(taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
+            createTaskObject(taskTitle, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpaceName, selectedSpaceId)
         } else{
             editTaskObj(e, taskTitleInput.value, taskDateInput.value, taskPrioritySelect.value, taskDescInput.value, selectedSpace.textContent, selectedSpace.value)
         }
         const openedSpaceId = getOpenedSpaceId();
-        DOMdisplayTasks(e, openedSpaceId);
+        DOMdisplayTasksInfo(e, openedSpaceId);
         const tasks = getTasksObj();
         saveToLocalStorage("tasks", tasks, true);
         taskForm.reset();
@@ -370,17 +380,19 @@ spaceDialog.classList.add("space-form");
     spaceFormRow1.classList.add("form-row");
 
     const spaceTitleLabel = document.createElement("label");
-    spaceTitleLabel.textContent='Space title';
+    spaceTitleLabel.textContent='Title';
     spaceTitleLabel.for="space-title";
     const spaceTitleInput = document.createElement("input");
     spaceTitleInput.id="space-title";
+    spaceTitleInput.maxLength = 50;
     spaceTitleInput.name="space-title";
     spaceTitleInput.required="true";
     spaceTitleInput.type="text";
     spaceFormRow1.append(spaceTitleLabel, spaceTitleInput)
 
     const spaceFormRow2 = document.createElement("div");
-    spaceFormRow2.classList.add("form-row");
+    spaceFormRow2.classList.add("form-row", "emoji-row");
+    const emojiInputDiv = document.createElement("div");
     const spaceIconLabel = document.createElement("label");
     spaceIconLabel.textContent='Icon';
     spaceIconLabel.for="space-icon";
@@ -389,12 +401,12 @@ spaceDialog.classList.add("space-form");
     spaceIconInput.name="space-icon";
     spaceIconInput.type="text";
     spaceIconInput.readOnly=true;
-
+    const emojiPickerDiv = document.createElement("div");
     const emojiPicker = new Picker();
     emojiPicker.id = "emojiPicker";
     emojiPicker.hidden=true;
     emojiPicker.classList.add('light', 'hidden');
-
+    emojiPickerDiv.append(emojiPicker);
     const showPickerBtn = document.createElement("button");
     showPickerBtn.classList.add("show-picker-btn", "btn", "svg")
     showPickerBtn.ariaLabel="Choose space icon";
@@ -414,7 +426,8 @@ spaceDialog.classList.add("space-form");
         console.log(spaceIconInput.value)
         emojiPicker.classList.add('hidden');
       });
-    spaceFormRow2.append(spaceIconLabel, spaceIconInput, showPickerBtn, emojiPicker)
+    emojiInputDiv.append(spaceIconLabel, spaceIconInput, showPickerBtn)
+    spaceFormRow2.append(emojiInputDiv, emojiPickerDiv)
 
     const spaceFormBtn = document.createElement("button");
     spaceFormBtn.classList.add("space-form-btn")
@@ -425,8 +438,9 @@ spaceDialog.classList.add("space-form");
         const infoMode = getInfoMode();
         // ADD INPUT CHECKS
         const icon = spaceIconInput.value ? spaceIconInput.value : "📄";
+        const title = spaceTitleInput.value ? spaceTitleInput.value : "My space";
         if (infoMode === "add"){
-            createSpaceObject(spaceTitleInput.value, icon, true, true);
+            createSpaceObject(title, icon, true, true);
         } else{
             editSpaceObj(e, spaceTitleInput.value, spaceIconInput.value)
         }
@@ -444,6 +458,8 @@ spaceDialog.classList.add("space-form");
     spaceDialog.append(spaceFormContent)
     body.append(spaceDialog);
 
+
+    // show content
     if(storageAvailable("localStorage")){
         const spacesObj = getSpacesObj();
         console.log(spacesObj)
@@ -451,11 +467,11 @@ spaceDialog.classList.add("space-form");
         console.log(tasksObj)
         const savedSpaces = getFromLocalStorage("spaces", true);
         const savedTasks = getFromLocalStorage("tasks", true);
-        const savedNumberOfTasks = getFromLocalStorage("tasks-num", false);
-        const savedOpenedSpaceId = getFromLocalStorage("space-id", false);
-        const savedCurrentSpaceId = getFromLocalStorage("current-space", false)
+        const savedOpenedSpaceId = getFromLocalStorage("current-space", false);
+        const savedCurrentSpaceId = getFromLocalStorage("space-id", false);
+
         currentSpaceId = savedCurrentSpaceId;
-        if (savedSpaces !== null && savedTasks !== null && savedNumberOfTasks !== null && savedOpenedSpaceId !== null ){
+        if (savedSpaces !== null && savedTasks !== null && savedOpenedSpaceId !== null ){
             Object.values(savedSpaces).forEach(space => {
                 if (space.isCustom){
                     addSpaceToSpaces(space)
@@ -467,6 +483,14 @@ spaceDialog.classList.add("space-form");
               });
               openedSpaceId = savedOpenedSpaceId;
               updateSpaceSelectOptions();
+
+              const sidebarClasslist = getFromLocalStorage("sidebar-state", false)
+              if (sidebarClasslist.includes("open")){
+                sidebar.classList.add("open")
+              }else{
+                sidebar.classList.remove("open")
+              }
+
         } else {
     // create default ones, save them and display
         const mySpace = createSpaceObject("My project", "👾", true, true);
@@ -484,17 +508,18 @@ spaceDialog.classList.add("space-form");
         const tasks = getTasksObj();
         saveToLocalStorage("tasks", tasks, true);
     
-        const numberOfTasks = getNumberOfTasks();
-        saveToLocalStorage("tasks-num", numberOfTasks, false);
+        // const numberOfTasks = getNumberOfTasks();
+        // saveToLocalStorage("tasks-num", numberOfTasks, false);
     
         const openedSpaceId = getOpenedSpaceId();
-        saveToLocalStorage("space-id", openedSpaceId, false);
+        saveToLocalStorage("current-space", openedSpaceId, false);
+        saveToLocalStorage("sidebar-state", sidebar.classList, false)
         updateSpaceSelectOptions();
         }
     }
 
 document.addEventListener('DOMContentLoaded', (e)=>{  
-DOMdisplayTasks(e, openedSpaceId);
+DOMdisplayTasksInfo(e, openedSpaceId);
 })
 
-export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer}
+export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer, sidebar, spaceIcon, spaceHeader}

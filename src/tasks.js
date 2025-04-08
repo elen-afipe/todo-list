@@ -70,6 +70,8 @@ function getTaskObjById(taskId){
 }
 function changeTaskDoneStatus(task){
     task.doneStatus = !task.doneStatus;
+    const tasks = getTasksObj();
+    saveToLocalStorage("tasks", tasks, true);
 }
 
 function getTaskIndex(e){

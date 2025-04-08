@@ -26,7 +26,8 @@ function addSpaceToSpaces(space){
 
 let currentSpaceId = 0;
 function initializeSpaceId() {
-    const savedId = getFromLocalStorage("current-space", false);
+    // const savedId = getFromLocalStorage("current-space", false); // old
+    const savedId = getFromLocalStorage("space-id", false);
     const spaces = getSpacesObj();
     let highestId = 0;
     
@@ -49,7 +50,8 @@ function getCurrentSpaceId(){
 
 function generateSpaceId(){
     currentSpaceId+=1;
-    saveToLocalStorage("current-space", currentSpaceId, false)
+    // saveToLocalStorage("current-space", currentSpaceId, false) // old
+    saveToLocalStorage("space-id", currentSpaceId, false)
     return currentSpaceId;
 }
 
@@ -70,6 +72,14 @@ function getSpaceByIndex(index){
     const spaces = getSpacesObj();
     return spaces[index];
 }
+
+function getSpaceById(id){
+  const spaces = getSpacesObj();
+    return spaces.find(space => 
+        Number(space.id) === Number(id)
+      );
+}
+
 function deleteSpaceObj(e){
     const spaceIndex = getSpaceIndex(e)
     const spaces = getSpacesObj();
@@ -85,4 +95,4 @@ function editSpaceObj(e, newTitle, newIcon){
     thisSpace.icon = newIcon;
 }
 
-export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj, getSpaceByIndex, getSpaceIndex, editSpaceObj, getCurrentSpaceId, initializeSpaceId}
+export {createSpaceObject, addSpaceToSpaces, deleteSpaceObj, getSpacesObj, getSpaceByIndex, getSpaceIndex, editSpaceObj, getCurrentSpaceId, initializeSpaceId, getSpaceById}

@@ -23,7 +23,8 @@ function updateOpenedSpaceId(e, idOfNotOpenedSpace = false){
     clickedSpaceId = idOfNotOpenedSpace;
   }
   openedSpaceId = clickedSpaceId;
-  saveToLocalStorage("space-id", openedSpaceId, false)
+  // saveToLocalStorage("space-id", openedSpaceId, false) //old
+  saveToLocalStorage("current-space", openedSpaceId, false)
   return openedSpaceId;
 }
 

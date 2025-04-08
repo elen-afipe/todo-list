@@ -4,8 +4,8 @@ import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
 import {getInfoMode, getObjectId, setInfoMode, updateOpenedSpaceId, getOpenedSpaceId, getNumberOfTasks, setNumberOfTasks, saveToLocalStorage, getFromLocalStorage} from "./viewer-functions.js"
 import {getTasksObj, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols, getTaskIndex, getTaskByIndex} from "./tasks.js"
-import { getSpacesObj, deleteSpaceObj, getSpaceByIndex, getSpaceIndex} from "./spaces.js";
-import {taskCardElements, taskSpaceSelect, tasksContainer, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, customSpaces, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer} from "./dom-content.js"
+import { getSpacesObj, deleteSpaceObj, getSpaceByIndex, getSpaceIndex, getSpaceById} from "./spaces.js";
+import {taskCardElements, taskSpaceSelect, tasksContainer, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, customSpaces, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer, sidebar, spaceIcon, spaceHeader} from "./dom-content.js"
 import {format, startOfWeek, endOfWeek, eachDayOfInterval} from "date-fns"
 const body = document.querySelector("body");
 
@@ -26,7 +26,7 @@ function DOMdisplayDefaultSpace(spaceObj, container){
     spaceRow.append(spaceLogo)
     spaceRow.addEventListener("click", (e)=>{
         updateOpenedSpaceId(e);
-        DOMdisplayTasks(e);
+        DOMdisplayTasksInfo(e);
     }
   )
     spacesContainer.append(spaceRow);
@@ -50,8 +50,8 @@ function DOMdisplayCustomSpace(spaceObj, container){
     
     const editSpaceBtn = document.createElement("button");
     editSpaceBtn.classList.add("edit-space", "btn", "svg");
-    editSpaceBtn.ariaLabel="Edit Space";
-    editSpaceBtn.title = "Edit Space";
+    editSpaceBtn.ariaLabel="Edit space";
+    editSpaceBtn.title = "Edit space";
     const editSpaceIcon = document.createElement("img");
     editSpaceIcon.src= editIcon;
     editSpaceBtn.append(editSpaceIcon);
@@ -64,7 +64,7 @@ function DOMdisplayCustomSpace(spaceObj, container){
         deleteSpace(e); 
         const spaces = getSpacesObj();
         deleteObjTasksFromSpace(e);
-        DOMdisplayTasks(e, 1);
+        DOMdisplayTasksInfo(e, 1);
         updateOpenedSpaceId(e, 1)
         const tasks = getTasksObj();
         saveToLocalStorage("spaces", spaces, true);
@@ -81,7 +81,7 @@ function DOMdisplayCustomSpace(spaceObj, container){
     spaceRow.addEventListener("click", (e)=>{
         e.stopPropagation();
         updateOpenedSpaceId(e);
-        DOMdisplayTasks(e);
+        DOMdisplayTasksInfo(e);
     }
   )
     spacesContainer.append(spaceRow);
@@ -138,12 +138,15 @@ function DOMdisplayTaskRow(taskObj, container){
     taskRow.onclick=DOMdisplayTaskInfo;
 
     const leftContainer = document.createElement("div");
-
+    leftContainer.classList.add("task-title")
     const doneBtn = document.createElement("button");
     doneBtn.classList.add("done-btn");
-    doneBtn.textContent = (newTask.doneStatus === true) ? "✓" : "";
+    console.log(newTask)
+    console.log(`in display done status: ${newTask.doneStatus}`)
+    doneBtn.textContent = (newTask.doneStatus === true) ? "✓" : " ";
     doneBtn.onclick = handleTaskDoneClick;
-
+    doneBtn.onmouseenter = () => {doneBtn.textContent = " " ? "✓": " "};
+    doneBtn.onmouseleave = () => {doneBtn.textContent = (newTask.doneStatus !== true) ? " ": "✓"};
     const taskName = document.createElement("div");
     taskName.classList.add("task-name");
     taskName.textContent= newTask.title;
@@ -162,10 +165,11 @@ function DOMdisplayTaskRow(taskObj, container){
 
     
     const taskBtns = document.createElement("div");
+    taskBtns.classList.add("task-btns")
     const editTaskBtn = document.createElement("button");
     editTaskBtn.classList.add("edit-task", "svg","btn");
-    editTaskBtn.ariaLabel="Edit Task";
-    editTaskBtn.title = "Edit Task";
+    editTaskBtn.ariaLabel="Edit task";
+    editTaskBtn.title = "Edit task";
     editTaskBtn.onclick=openEditTaskForm;
     const editTaskIcon = document.createElement("img");
     editTaskIcon.src= editIcon;
@@ -179,7 +183,7 @@ function DOMdisplayTaskRow(taskObj, container){
                 deleteTask(e);
                 const tasks = getTasksObj();
                 saveToLocalStorage("tasks", tasks, true);
-                DOMdisplayTasks(e);
+                DOMdisplayTasksInfo(e);
     })
     const deleteTaskIcon = document.createElement("img");
     deleteTaskIcon.src= deleteIcon;
@@ -300,6 +304,7 @@ function updateSpaceSelectOptions(){
             console.log(space.isSelectLabel)
             if (space.isSelectLabel === true){
                 const taskSpace = document.createElement("option");
+                taskSpace.classList.add("select-option");
                 taskSpace.textContent= `${space.icon} ${space.title}`;
                 taskSpace.value = space.id;
                 taskSpaceSelect.append(taskSpace);
@@ -307,11 +312,12 @@ function updateSpaceSelectOptions(){
             })
 }
 
-function DOMdisplayTasks(e, spaceId = false){
+function DOMdisplayTasksInfo(e, spaceId = false){
     e.stopPropagation();
     if(spaceId === false){
         spaceId = getOpenedSpaceId();
     }
+    const openedSpace = getSpaceById(spaceId);
     console.log(`opened space id: ${spaceId}`)
     tasksContainer.innerHTML="";
     let numberOfTasks = 0;
@@ -376,6 +382,8 @@ function DOMdisplayTasks(e, spaceId = false){
     }    
     setNumberOfTasks(numberOfTasks);
     DOMdisplayTaskNumber(numberOfTasks);
+    spaceIcon.textContent= openedSpace.icon;
+    spaceHeader.textContent= openedSpace.title;
 }
 
 function styleDueDate(date){
@@ -400,7 +408,7 @@ function preloadSpaceInputs(e){
 function openEditSpaceForm(e){
     setInfoMode("edit");
     spaceFormLegend.textContent="Up for a change?"; 
-    spaceFormBtn.textContent="Edit space";
+    spaceFormBtn.textContent="Save changes";
     const spaceId = getObjectId(e);
     spaceDialog.dataset.id = spaceId;
     preloadSpaceInputs(e);
@@ -430,7 +438,7 @@ function openEditTaskForm(e){
     e.stopPropagation();
     setInfoMode("edit");
     taskFormLegend.textContent="Up for a change?"; 
-    taskFormBtn.textContent="Edit task";
+    taskFormBtn.textContent="Save changes";
     const taskId = getObjectId(e);
     taskDialog.dataset.id = taskId;
     preloadTaskInputs(e);
@@ -449,11 +457,16 @@ function DOMdisplayTaskNumber(taskNumber){
     if(taskNumber === 0){
         tasksCounterContainer.textContent="Yay! No tasks"
     } else if (taskNumber === 1){
-        tasksCounterContainer.textContent="1 task left"
+        tasksCounterContainer.textContent="1 task left:"
     } else {
-        tasksCounterContainer.textContent=`${taskNumber} tasks left`
+        tasksCounterContainer.textContent=`${taskNumber} tasks left:`
     }
 }
 
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasks, deleteObjTasksFromSpace, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm}
+function toggleSidebar(){
+    sidebar.classList.toggle("open");
+    saveToLocalStorage("sidebar-state", sidebar.classList, false)
+}
+
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasksInfo, deleteObjTasksFromSpace, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar}
 
