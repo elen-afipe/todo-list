@@ -3,8 +3,10 @@ import cancelIcon from "./icons/cancel.svg";
 import deleteIcon from "./icons/delete.svg"
 import sidebarIcon from "./icons/sidebar.svg"
 import addIcon from "./icons/add.svg";
-import emojiIcon from "./icons/emoji.svg"
+import emojiIcon from "./icons/emoji.svg";
+import logoIcon from "./icons/code.svg";
 import { Picker } from 'emoji-picker-element';
+import {format, startOfWeek, endOfWeek, eachDayOfInterval} from "date-fns"
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
 // import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
@@ -39,12 +41,13 @@ logoContainer.classList.add("logo-container");
 
 const logoImg = document.createElement("img");
 logoImg.classList.add("logo-img", "svg")
+logoImg.src = logoIcon
 
 const logoText = document.createElement("div");
 logoText.classList.add("logo-text");
-logoText.textContent="{ ToDoCode }";
+logoText.textContent="{ToDoCode}";
 
-logoContainer.append(logoImg, logoText);
+logoContainer.append(logoText, logoImg);
 nav.append(sideBtn, logoContainer);
 
 
@@ -104,11 +107,11 @@ sidebar.append(filteredSpaces, addSpaceBtn, customSpaces);
 main.append(sidebar, todoContainer)
 body.append(nav, main)
 
-const allSpace = createSpaceObject("All", "📚️", true, false, 1);
+const allSpace = createSpaceObject("All", "📖", true, false, 1);
 const todaySpace = createSpaceObject("Today", "📝", false, false, 2);
 const weekSpace = createSpaceObject("Week", "📑", false, false, 3);
 const monthSpace = createSpaceObject("Month", "📆", false, false, 4);
-const doneSpace = createSpaceObject("Done", "✅️", false, false, 5);
+const doneSpace = createSpaceObject("Done", "😎", false, false, 5);
 DOMdisplayDefaultSpace(allSpace, filteredSpaces);
 DOMdisplayDefaultSpace(todaySpace, filteredSpaces);
 DOMdisplayDefaultSpace(weekSpace, filteredSpaces);
@@ -495,13 +498,25 @@ spaceDialog.classList.add("space-form");
     // create default ones, save them and display
         const mySpace = createSpaceObject("My project", "👾", true, true);
         DOMdisplayCustomSpace(mySpace, customSpaces);
-        const mySSpace = createSpaceObject("Leisure", "👾", true, true);
-        DOMdisplayCustomSpace(mySSpace, customSpaces);
+          const today = new Date();
+        const todayFormatted = format(today, 'yyyy-MM-dd');
+    
+            createTaskObject("Think of project logic", todayFormatted, "high", "Stare at blank wall with no idea where to start. Drink coffee. Draw boxes and arrows that make no sense. Write first line of pseudocode.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+            createTaskObject("Gather assets", todayFormatted, "medium", "Download 200 stock photos of people pointing at screens with impossibly bright smiles. Bonus: Find that one icon that's slightly different from all the others to torment future-me.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+            createTaskObject("Set up webpack", todayFormatted, "high", "Copy config from last project. Add random plugins until errors change from red to yellow. Declare victory when terminal shows any color besides red.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+            createTaskObject("Copy-paste Stack Overflow solutions", "2025-04-12", "high", "Find at least 5 different approaches to the same problem and try them all until something magically works.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 
-        createTaskObject("MAKE CREATING TASKS WORK", "2025-04-02", "high", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-        createTaskObject("Think of project logic", "2025-04-05", "high", "Just another project", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-        createTaskObject("Gather assets", "2025-04-06", "medium", "Just another task", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-        
+                createTaskObject("Create project folder structure", "2025-04-15", "medium", "Make it look professional with lots of empty folders for things I think I might need later but won't.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+
+                createTaskObject("Install 37 npm packages", todayFormatted, "medium", "Need one tiny utility function? Better install a 15MB package with 200 dependencies!", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+
+                createTaskObject("Make first git commit", "2025-04-20", "low", "Commit message: 'Initial commit' after already writing 2000 lines of code. What could go wrong?", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+
+                createTaskObject("Create responsive design", "2025-04-25", "high", "Make it look perfect on desktop. Panic when checking mobile. Add 'max-width: 100%' everywhere.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+
+                createTaskObject("Debug CSS issues", "2025-05-01", "high", "Try random combinations of display, position, and flex until it either works or I give up and use grid.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+                            
+
         const spaces = getSpacesObj();
         saveToLocalStorage("spaces", spaces, true);
         

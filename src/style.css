@@ -1,3 +1,4 @@
+
 /* reset */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -67,11 +68,16 @@ body {
   /* style */
   :root{
     --black: black;
+    --dark-text: #1C192D;
     font-family: Arial, Helvetica, sans-serif;
     --background: white;
+    /* --task-row-width: 200; */
     --nav-height: 70px;
-    --sidebar-width: 200px;
+    --sidebar-width: 220px;
+    /* --task-btns-width: 108px; */
+    --task-title-width: 60%;
     --accent-color: #EFEEFF;
+    --accent-active: #d0ccff; 
     --accent-tint: #BCB9FF;
     --accent-hover: #bcb9ff62;
     --light-text: #545454;
@@ -89,7 +95,7 @@ body{
 .content-container{
     display: flex;
     gap:40px;
-    height: calc(100vh - var(--nav-height));
+    height: calc(100% - var(--nav-height));
     width: 100%;
     position: relative;
 }
@@ -106,14 +112,28 @@ body{
   
   }
 
+  .logo-container{
+    width: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
   .logo-text{
-  /* text-transform: uppercase; */
-    font-style: italic;
-    font-weight: 600;
-    font-size: 1.5rem;
+    color: var(--dark-text);
+    font-family: "Press Start 2P";
+    font-size: 1.4rem;
+  }
+  .logo-img{
+    filter: invert(8%) sepia(43%) saturate(776%) hue-rotate(209deg) brightness(87%) contrast(94%);
+    width: 40px;
+    height: 40px;
   }
 /* sidebar */
 .side-btn.btn.svg{
+    width: 45px;
+    height: 45px;
     filter: invert(71%) sepia(14%) saturate(3407%) hue-rotate(199deg) brightness(112%) contrast(101%);
 }
 .sidebar{
@@ -138,11 +158,10 @@ body{
     position: relative;
 }
 .sidebar:not(.open) + .todo-container {
-    margin-left: calc(var(--sidebar-width) - 40px);
+    width: 100%;
+    margin-left: calc(var(--sidebar-width) - 60px);
   }
-  .sidebar.open + .content {
-    margin-left: 0; 
-  }
+
 .sidebar > div:first-child{
 padding-bottom: 5px;
 border-bottom: 2px solid var(--accent-hover);
@@ -158,8 +177,14 @@ border-bottom: 2px solid var(--accent-hover);
     height: 36px;
     border-radius: 10px;
 }
+.space-row.active{
+    color: var(--dark-text);
+    font-weight: 500;
+    background-color: var(--accent-active);
+    transition: background-color 200ms ease-in-out;
+}
 .space-row .space-name{
-    width: 69px;
+    width: 90px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -182,6 +207,10 @@ justify-content: center;
 .add-space.svg.btn{
     filter: invert(71%) sepia(14%) saturate(3407%) hue-rotate(199deg) brightness(112%) contrast(101%);
 }
+.space-row .emoji{
+    font-family: "Noto Emoji";
+}
+
 
 /* .space-row > div:last-child{
     
@@ -190,19 +219,27 @@ justify-content: center;
 /* tasks info */
 .todo-container{
     display: flex;
+    width:calc(100% - var(--sidebar-width));
     flex-direction: column;
     flex: 1 1 auto;
-    margin-left: 40px;
-    margin-top: 35px;
+    margin: 35px 0px 0px 40px;
+    padding-bottom: 20px;
+    padding-right: 100px;
+    /* margin-left: 40px;
+    margin-top: 35px; */
     /* transition: margin-left ease-in-out 200ms; */
 }
-
+.header-row{
+    width: calc(100% - 108px);
+    /* max-width: 100%; */
+    /* width: calc(var(--task-row-width) - var(--task-btns-width)); */
+}
 .header-row .space-icon.emoji{
     font-size: 4rem;
     margin-bottom: 5px;
 }
 .space-header{
-    width: calc(900px - 108px);
+    /* width: calc(var(--task-row-width) - var(--task-btns-width)); */
     font-size: 1.5rem;
     font-weight: 600;
     padding-bottom: 10px;
@@ -219,13 +256,27 @@ justify-content: center;
 }
 
 .tasks-container{
+    width: 100%;
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
 }
 
+.task-title{
+    min-width:60%;
+}
+.task-name{
+    min-width: 90%;
+    /* width: var(--task-title-width); */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 .task-row{
-    width: 900px;
+    width: 100%;
+    /* min-width: 80%; */
+    /* min-width: calc(var(--task-title-width + --task-btns-width + 100px)); */
+    /* width: var(--task-row-width); */
     height: 47px;
     display: flex;
     align-items: center;
@@ -243,7 +294,7 @@ justify-content: center;
     bottom: 0;
     left: 0;
     content: " ";
-    width: calc(900px - 108px);
+    width: calc(100% - 108px);
     height: 1px;
     background-color: var(--underline);
     border-bottom: 1.5px solid var(--underline);
@@ -268,14 +319,9 @@ justify-content: center;
     opacity: 1;
     transition: opacity 200ms ease-in-out;
 }
-.tasks-container .task-title{
-    width: 600px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
+
 .tasks-container .task-btns{
-    width: 108px;
+    width: var(--task-btns-width);
 }
 .tasks-container .task-date{
     color: var(--light-text);
@@ -334,7 +380,7 @@ justify-content: center;
     background-color: var(--accent-hover);
     overflow-y: scroll;
     overflow-x: hidden;
-    word-break: break-all;
+    word-break: pretty;
  }
  ::backdrop {
     background-color:rgba(0,0,0,0.5);
@@ -483,7 +529,6 @@ textarea{
     cursor: pointer;
     content: "✓";
 }
-
 .emoji{
     font-size: 1.5rem;
     /* font-family: ; */
@@ -500,4 +545,76 @@ transition: opacity ease-in-out 100ms;
 
 .space-row:hover .btn{
 opacity: 1;
+}
+
+@media(max-width:900px){
+    .sidebar:not(.open) + .todo-container {
+        width: 100%;
+        margin-left: calc(var(--sidebar-width) - 180px);
+    }
+    .todo-container {
+        padding-right: 20px;
+    }
+}
+
+@media(max-width:800px){
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+        top: var(--nav-height);
+        position: fixed;
+        left: 0;
+        overflow-y: auto;
+      }
+      .task-title{
+        min-width: 40%;
+      }
+      .sidebar.open {
+        position: fixed;
+      }
+      
+      .sidebar.open + .todo-container {
+        visibility: hidden; 
+      }
+
+    .content-container{
+        gap: 0px;
+    }
+    .space-row .space-name, .space-row .space-name.active{
+        width: 400px;
+    }
+    /* .task-row  .btn.svg,
+    .space-row .btn.svg{
+        width: 25px;
+        height: 25px;
+    } */
+    .sidebar:not(.open) + .todo-container {
+        width: 100%;
+        margin-left: calc(var(--sidebar-width) - 190px);
+    }
+    .todo-container {
+        padding-right: 10px;
+    }
+}
+@media(max-width:500px){
+    .space-row .space-name, .space-row .space-name.active{
+        width: 300px;
+    }
+    .task-btns{
+        display: none;
+    }
+    .tasks-container .task-row::after{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        content: " ";
+        width: 100%;
+        height: 1px;
+        background-color: var(--underline);
+        border-bottom: 1.5px solid var(--underline);
+    }
+    .task-row {
+        padding-right: 20px;
+    }
 }

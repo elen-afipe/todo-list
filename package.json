@@ -14,6 +14,11 @@
     "deploy": "git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
+    "@fontsource/noto-color-emoji": "^5.2.6",
+    "@fontsource/noto-emoji": "^5.2.5",
+    "@fontsource/press-start-2p": "^5.2.5",
+    "@fontsource/source-code-pro": "^5.2.5",
+    "@infolektuell/noto-color-emoji": "^0.2.0",
     "country-flag-emoji-polyfill": "^0.1.8",
     "date-fns": "^4.1.0",
     "emoji-picker-element": "^1.26.1"

@@ -26,6 +26,7 @@ function DOMdisplayDefaultSpace(spaceObj, container){
     spaceRow.append(spaceLogo)
     spaceRow.addEventListener("click", (e)=>{
         updateOpenedSpaceId(e);
+        updateOpenedSpaceStyle();
         DOMdisplayTasksInfo(e);
     }
   )
@@ -81,6 +82,7 @@ function DOMdisplayCustomSpace(spaceObj, container){
     spaceRow.addEventListener("click", (e)=>{
         e.stopPropagation();
         updateOpenedSpaceId(e);
+        updateOpenedSpaceStyle();
         DOMdisplayTasksInfo(e);
     }
   )
@@ -144,7 +146,10 @@ function DOMdisplayTaskRow(taskObj, container){
     console.log(newTask)
     console.log(`in display done status: ${newTask.doneStatus}`)
     doneBtn.textContent = (newTask.doneStatus === true) ? "✓" : " ";
-    doneBtn.onclick = handleTaskDoneClick;
+    doneBtn.addEventListener("click", (e)=>{
+        handleTaskDoneClick(e)
+        DOMdisplayTasksInfo(e);
+    })
     doneBtn.onmouseenter = () => {doneBtn.textContent = " " ? "✓": " "};
     doneBtn.onmouseleave = () => {doneBtn.textContent = (newTask.doneStatus !== true) ? " ": "✓"};
     const taskName = document.createElement("div");
@@ -251,7 +256,10 @@ function handleTaskDoneClick(e){
 document.addEventListener('DOMContentLoaded', function() {
     const doneBtns = document.querySelectorAll(".done-btn");
     for (const doneBtn of doneBtns) {
-      doneBtn.onclick = handleTaskDoneClick;
+      doneBtn.addEventListener("click", (e)=>{
+        handleTaskDoneClick(e)
+        DOMdisplayTasksInfo(e);
+    })
     }
   });
   
@@ -466,6 +474,18 @@ function DOMdisplayTaskNumber(taskNumber){
 function toggleSidebar(){
     sidebar.classList.toggle("open");
     saveToLocalStorage("sidebar-state", sidebar.classList, false)
+}
+
+function updateOpenedSpaceStyle(){
+    const spaceRows = document.querySelectorAll(".space-row");
+    const openedSpaceId = getOpenedSpaceId();
+    spaceRows.forEach(spaceRow => {
+        spaceRow.classList.remove("active");
+        if (Number(spaceRow.dataset.id) === Number(openedSpaceId)){
+            spaceRow.classList.add("active");
+        }
+    }
+    )
 }
 
 export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasksInfo, deleteObjTasksFromSpace, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar}
