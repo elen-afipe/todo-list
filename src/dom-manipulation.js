@@ -1,8 +1,7 @@
 import editIcon from "./icons/edit.svg";
-import cancelIcon from "./icons/cancel.svg";
 import infoIcon from "./icons/info.svg";
 import deleteIcon from "./icons/delete.svg"
-import {getInfoMode, getObjectId, setInfoMode, updateOpenedSpaceId, getOpenedSpaceId, getNumberOfTasks, setNumberOfTasks, saveToLocalStorage, getFromLocalStorage} from "./viewer-functions.js"
+import {getObjectId, setInfoMode, updateOpenedSpaceId, getOpenedSpaceId, setNumberOfTasks, saveToLocalStorage} from "./viewer-functions.js"
 import {getTasksObj, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols, getTaskIndex, getTaskByIndex} from "./tasks.js"
 import { getSpacesObj, deleteSpaceObj, getSpaceByIndex, getSpaceIndex, getSpaceById} from "./spaces.js";
 import {taskCardElements, taskSpaceSelect, tasksContainer, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, customSpaces, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer, sidebar, spaceIcon, spaceHeader} from "./dom-content.js"
@@ -143,8 +142,6 @@ function DOMdisplayTaskRow(taskObj, container){
     leftContainer.classList.add("task-title")
     const doneBtn = document.createElement("button");
     doneBtn.classList.add("done-btn");
-    console.log(newTask)
-    console.log(`in display done status: ${newTask.doneStatus}`)
     doneBtn.textContent = (newTask.doneStatus === true) ? "✓" : " ";
     doneBtn.addEventListener("click", (e)=>{
         handleTaskDoneClick(e)
@@ -220,10 +217,8 @@ function crossOutTaskTitle(task, titleElement){
 }
 
 function findRowTickContainer(tickContainer, taskId){
-    // console.log(tickContainer.closest('.task-row') !== null)
     const isInTaskRow = tickContainer.closest('.task-row') !== null;
     if(isInTaskRow){
-        // extraTickContainer = document.querySelector(`.task-card[data-id="${taskId}"] .done-btn`);
         return false;
     }else{
        const rowTickContainer = document.querySelector(`.task-row[data-id="${taskId}"] .done-btn`);
@@ -309,7 +304,6 @@ function updateSpaceSelectOptions(){
     taskSpaceSelect.innerHTML = '';
     taskSpaceSelect.appendChild(defaultOption);
         spaces.forEach(space => {
-            console.log(space.isSelectLabel)
             if (space.isSelectLabel === true){
                 const taskSpace = document.createElement("option");
                 taskSpace.classList.add("select-option");
@@ -326,7 +320,6 @@ function DOMdisplayTasksInfo(e, spaceId = false){
         spaceId = getOpenedSpaceId();
     }
     const openedSpace = getSpaceById(spaceId);
-    console.log(`opened space id: ${spaceId}`)
     tasksContainer.innerHTML="";
     let numberOfTasks = 0;
     const tasks = getTasksObj();

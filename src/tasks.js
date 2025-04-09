@@ -93,12 +93,9 @@ function getTaskByIndex(index){
 
 function deleteTaskObj(e){
     const taskIndex = getTaskIndex(e);
-    console.log(taskIndex)
     const tasks = getTasksObj();
-    console.log(tasks);
     if(taskIndex !== "no match"){
         tasks.splice(taskIndex, 1);
-        console.log(tasks);
     }
 }
 
@@ -112,9 +109,7 @@ function editTaskObj(e, newTitle, newDueDate, newPriority, newDescription, newSp
     thisTask.spaceTitle = newSpaceTitle;
     thisTask.spaceId = newSpaceId;
 }
-// function getNumberOfTasks(space){
 
-// }
 export {createTaskObject, getTaskObjById, changeTaskDoneStatus, deleteTaskObj, getTaskPrioritySymbols, getTasksObj, getTaskByIndex, getTaskIndex, editTaskObj, addTaskToTasks, initializeTaskId}
 
 

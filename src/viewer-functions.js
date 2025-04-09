@@ -23,7 +23,6 @@ function updateOpenedSpaceId(e, idOfNotOpenedSpace = false){
     clickedSpaceId = idOfNotOpenedSpace;
   }
   openedSpaceId = clickedSpaceId;
-  // saveToLocalStorage("space-id", openedSpaceId, false) //old
   saveToLocalStorage("current-space", openedSpaceId, false)
   return openedSpaceId;
 }
@@ -67,10 +66,8 @@ function storageAvailable(type) {
 function saveToLocalStorage(key, dataToStore, needsJSONConversion){
   if (needsJSONConversion){
     localStorage.setItem(`${key}`, JSON.stringify(dataToStore));
-    console.log(JSON.parse(localStorage.getItem(`${key}`)))
   } else{
     localStorage.setItem(`${key}`, dataToStore)
-    console.log(localStorage.getItem(`${key}`))
   }
 }
 
@@ -78,11 +75,9 @@ function getFromLocalStorage(key, needsJSONConversion){
   if (needsJSONConversion){
     const data = JSON.parse(localStorage.getItem(`${key}`));
     return data;
-    console.log(JSON.parse(localStorage.getItem(`${key}`)))
   } else{
     const data = localStorage.getItem(`${key}`);
     return data;
-    console.log(localStorage.getItem(`${key}`))
   }
 }
 

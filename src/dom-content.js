@@ -6,12 +6,11 @@ import addIcon from "./icons/add.svg";
 import emojiIcon from "./icons/emoji.svg";
 import logoIcon from "./icons/code.svg";
 import { Picker } from 'emoji-picker-element';
-import {format, startOfWeek, endOfWeek, eachDayOfInterval} from "date-fns"
+import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
-// import {filteredSpaces, customSpaces, tasksContainer} from "./dom-content.js";
-import {getOpenedSpaceId, getInfoMode, setInfoMode, storageAvailable, saveToLocalStorage, getFromLocalStorage, getNumberOfTasks} from "./viewer-functions.js"
-import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, DOMdisplayTaskRow, deleteTask, updateSpaceSelectOptions, DOMdisplayTasksInfo, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar} from "./dom-manipulation";
+import {getOpenedSpaceId, getInfoMode, storageAvailable, saveToLocalStorage, getFromLocalStorage} from "./viewer-functions.js"
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, deleteTask, updateSpaceSelectOptions, DOMdisplayTasksInfo, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar} from "./dom-manipulation";
 import { createSpaceObject, editSpaceObj, getSpacesObj, addSpaceToSpaces, getCurrentSpaceId, initializeSpaceId} from "./spaces";
 import { createTaskObject, editTaskObj, getTasksObj, addTaskToTasks, initializeTaskId} from "./tasks";
 import {getTaskPrioritySymbols} from "./tasks.js"
@@ -19,7 +18,6 @@ import {getTaskPrioritySymbols} from "./tasks.js"
 initializeTaskId();
 
 let openedSpaceId = getOpenedSpaceId();
-let currentSpaceId = getCurrentSpaceId();
 const body = document.querySelector("body");
 
 // localStorage.clear();
@@ -176,7 +174,6 @@ const taskCard = document.createElement("dialog");
     taskContent.addEventListener('click', (event) => event.stopPropagation());
     
     taskBtns.append(editTaskBtn, deleteTaskBtn, closeTaskInfoBtn)
-    // taskBtns.append(closeTaskInfoBtn)
     taskHeader.append(spaceTitle, taskBtns)
     
     const taskMain = document.createElement("main");
@@ -243,7 +240,7 @@ const taskDialog = document.createElement("dialog");
 
     const taskTitleLabel = document.createElement("label");
     taskTitleLabel.textContent='Title';
-    taskTitleLabel.for="task-title";
+    taskTitleLabel.htmlFor="task-title";
     const taskTitleInput = document.createElement("input");
     taskTitleInput.id="task-title";
     taskTitleInput.name="task-title";
@@ -257,7 +254,7 @@ const taskDialog = document.createElement("dialog");
 
     const taskDateLabel = document.createElement("label");
     taskDateLabel.textContent='Due to';
-    taskDateLabel.for="task-date";
+    taskDateLabel.htmlFor="task-date";
     const taskDateInput = document.createElement("input");
     taskDateInput.id="task-date";
     taskDateInput.name="task-date";
@@ -271,7 +268,7 @@ const taskDialog = document.createElement("dialog");
     const taskPrioritySymbols = getTaskPrioritySymbols();
     const taskPriorityLabel = document.createElement("label");
     taskPriorityLabel.textContent='Priority';
-    taskPriorityLabel.for="task-date";
+    taskPriorityLabel.htmlFor="task-date";
     const taskPrioritySelect = document.createElement("select");
     taskPrioritySelect.name="task-date"
     taskPrioritySelect.id="task-date"
@@ -302,7 +299,7 @@ const taskDialog = document.createElement("dialog");
     const taskDescLabel = document.createElement("label");
     taskDescLabel.textContent='Notes';
     taskDescLabel.classList.add("notes-label");
-    taskDescLabel.for="task-description";
+    taskDescLabel.htmlFor="task-description";
     const taskDescInput = document.createElement("textarea");
     taskDescInput.id="task-description";
     taskDescInput.name="task-description";
@@ -313,7 +310,7 @@ const taskDialog = document.createElement("dialog");
 
     const taskSpaceLabel = document.createElement("label");
     taskSpaceLabel.textContent='Space';
-    taskSpaceLabel.for="task-space";
+    taskSpaceLabel.htmlFor="task-space";
     const taskSpaceSelect = document.createElement("select");
     taskSpaceSelect.name="task-space"
     taskSpaceSelect.id="task-space"
@@ -384,7 +381,7 @@ spaceDialog.classList.add("space-form");
 
     const spaceTitleLabel = document.createElement("label");
     spaceTitleLabel.textContent='Title';
-    spaceTitleLabel.for="space-title";
+    spaceTitleLabel.htmlFor="space-title";
     const spaceTitleInput = document.createElement("input");
     spaceTitleInput.id="space-title";
     spaceTitleInput.maxLength = 50;
@@ -398,7 +395,7 @@ spaceDialog.classList.add("space-form");
     const emojiInputDiv = document.createElement("div");
     const spaceIconLabel = document.createElement("label");
     spaceIconLabel.textContent='Icon';
-    spaceIconLabel.for="space-icon";
+    spaceIconLabel.htmlFor="selectedEmoji";
     const spaceIconInput = document.createElement("input");
     spaceIconInput.id="selectedEmoji";
     spaceIconInput.name="space-icon";
@@ -426,7 +423,6 @@ spaceDialog.classList.add("space-form");
     emojiPicker.addEventListener('emoji-click', event => {
         spaceIconInput.value = event.detail.unicode;
         emojiPicker.hidden=true;
-        console.log(spaceIconInput.value)
         emojiPicker.classList.add('hidden');
       });
     emojiInputDiv.append(spaceIconLabel, spaceIconInput, showPickerBtn)
@@ -439,7 +435,6 @@ spaceDialog.classList.add("space-form");
         e.stopPropagation();
         e.preventDefault();
         const infoMode = getInfoMode();
-        // ADD INPUT CHECKS
         const icon = spaceIconInput.value ? spaceIconInput.value : "📄";
         const title = spaceTitleInput.value ? spaceTitleInput.value : "My space";
         if (infoMode === "add"){
@@ -465,15 +460,13 @@ spaceDialog.classList.add("space-form");
     // show content
     if(storageAvailable("localStorage")){
         const spacesObj = getSpacesObj();
-        console.log(spacesObj)
         const tasksObj = getTasksObj();
-        console.log(tasksObj)
         const savedSpaces = getFromLocalStorage("spaces", true);
         const savedTasks = getFromLocalStorage("tasks", true);
         const savedOpenedSpaceId = getFromLocalStorage("current-space", false);
         const savedCurrentSpaceId = getFromLocalStorage("space-id", false);
 
-        currentSpaceId = savedCurrentSpaceId;
+        const currentSpaceId = savedCurrentSpaceId;
         if (savedSpaces !== null && savedTasks !== null && savedOpenedSpaceId !== null ){
             Object.values(savedSpaces).forEach(space => {
                 if (space.isCustom){
@@ -500,21 +493,26 @@ spaceDialog.classList.add("space-form");
         DOMdisplayCustomSpace(mySpace, customSpaces);
           const today = new Date();
         const todayFormatted = format(today, 'yyyy-MM-dd');
-    
+        const tomorrow = addDays(today, 1);
+        const tomorrowFormatted = format(tomorrow, 'yyyy-MM-dd');
+        const nextWeek = addWeeks(today, 1);
+        const nextWeekFormatted = format(nextWeek, 'yyyy-MM-dd');
+        const nextMonth = addMonths(today, 1);
+        const nextMonthFormatted = format(nextMonth, 'yyyy-MM-dd');
             createTaskObject("Think of project logic", todayFormatted, "high", "Stare at blank wall with no idea where to start. Drink coffee. Draw boxes and arrows that make no sense. Write first line of pseudocode.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
             createTaskObject("Gather assets", todayFormatted, "medium", "Download 200 stock photos of people pointing at screens with impossibly bright smiles. Bonus: Find that one icon that's slightly different from all the others to torment future-me.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
             createTaskObject("Set up webpack", todayFormatted, "high", "Copy config from last project. Add random plugins until errors change from red to yellow. Declare victory when terminal shows any color besides red.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
-            createTaskObject("Copy-paste Stack Overflow solutions", "2025-04-12", "high", "Find at least 5 different approaches to the same problem and try them all until something magically works.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+            createTaskObject("Copy-paste Stack Overflow solutions", tomorrowFormatted, "high", "Find at least 5 different approaches to the same problem and try them all until something magically works.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 
-                createTaskObject("Create project folder structure", "2025-04-15", "medium", "Make it look professional with lots of empty folders for things I think I might need later but won't.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+                createTaskObject("Create project folder structure", tomorrowFormatted, "medium", "Make it look professional with lots of empty folders for things I think I might need later but won't.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 
-                createTaskObject("Install 37 npm packages", todayFormatted, "medium", "Need one tiny utility function? Better install a 15MB package with 200 dependencies!", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+                createTaskObject("Install 37 npm packages", tomorrowFormatted, "medium", "Need one tiny utility function? Better install a 15MB package with 200 dependencies!", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 
-                createTaskObject("Make first git commit", "2025-04-20", "low", "Commit message: 'Initial commit' after already writing 2000 lines of code. What could go wrong?", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+                createTaskObject("Make first git commit", nextWeekFormatted, "low", "Commit message: 'Initial commit' after already writing 2000 lines of code. What could go wrong?", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 
-                createTaskObject("Create responsive design", "2025-04-25", "high", "Make it look perfect on desktop. Panic when checking mobile. Add 'max-width: 100%' everywhere.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+                createTaskObject("Create responsive design", nextWeekFormatted, "high", "Make it look perfect on desktop. Panic when checking mobile. Add 'max-width: 100%' everywhere.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
 
-                createTaskObject("Debug CSS issues", "2025-05-01", "high", "Try random combinations of display, position, and flex until it either works or I give up and use grid.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
+                createTaskObject("Debug CSS issues", nextMonthFormatted, "high", "Try random combinations of display, position, and flex until it either works or I give up and use grid.", `${mySpace.icon} ${mySpace.title}`, `${mySpace.id}`)
                             
 
         const spaces = getSpacesObj();
@@ -522,9 +520,6 @@ spaceDialog.classList.add("space-form");
         
         const tasks = getTasksObj();
         saveToLocalStorage("tasks", tasks, true);
-    
-        // const numberOfTasks = getNumberOfTasks();
-        // saveToLocalStorage("tasks-num", numberOfTasks, false);
     
         const openedSpaceId = getOpenedSpaceId();
         saveToLocalStorage("current-space", openedSpaceId, false);

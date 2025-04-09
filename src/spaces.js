@@ -2,12 +2,10 @@ import {getObjectId, getFromLocalStorage, saveToLocalStorage} from "./viewer-fun
 
 const Spaces = [];
 function Space(spaceTitle, spaceIcon, isSelectLabel, isCustom, id = false){
-    console.log(id)
     this.title = spaceTitle; // string
     this.icon = spaceIcon; // emoji 
     this.isSelectLabel = isSelectLabel ? true : false;
     this.isCustom = isCustom ? true : false;
-    // this.tasks = []; // array with tasks id
     this.id = id ? id : generateSpaceId(); // id
 }
 function getSpacesObj(){
@@ -26,7 +24,6 @@ function addSpaceToSpaces(space){
 
 let currentSpaceId = 0;
 function initializeSpaceId() {
-    // const savedId = getFromLocalStorage("current-space", false); // old
     const savedId = getFromLocalStorage("space-id", false);
     const spaces = getSpacesObj();
     let highestId = 0;
@@ -50,7 +47,6 @@ function getCurrentSpaceId(){
 
 function generateSpaceId(){
     currentSpaceId+=1;
-    // saveToLocalStorage("current-space", currentSpaceId, false) // old
     saveToLocalStorage("space-id", currentSpaceId, false)
     return currentSpaceId;
 }

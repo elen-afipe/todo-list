@@ -57,24 +57,24 @@ body {
         resize: none;
     }
 
-  /* Disable copying buttons */
-  .btn {
+  /* Disable copying */
+  .btn, .logo-text, .sidebar .space-icon, .svg, .sidebar .space-name {
   user-select: none;
   }
+
   /* hide scrollbar */
-  .card-task-description::-webkit-scrollbar {
-    display: none;
-  }
+  ::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
+}
   /* style */
   :root{
     --black: black;
     --dark-text: #1C192D;
     font-family: Arial, Helvetica, sans-serif;
     --background: white;
-    /* --task-row-width: 200; */
     --nav-height: 70px;
     --sidebar-width: 220px;
-    /* --task-btns-width: 108px; */
     --task-title-width: 60%;
     --accent-color: #EFEEFF;
     --accent-active: #d0ccff; 
@@ -139,9 +139,7 @@ body{
 .sidebar{
     display: flex;
     flex-direction: column;
-    /* gap: 10px; */
     width: var(--sidebar-width);
-    /* width: fit-content; */
     color: var(--light-text);
     transform: translateX(-100%);
     transition: transform ease-in-out 200ms;
@@ -211,11 +209,6 @@ justify-content: center;
     font-family: "Noto Emoji";
 }
 
-
-/* .space-row > div:last-child{
-    
-} */
-
 /* tasks info */
 .todo-container{
     display: flex;
@@ -225,21 +218,15 @@ justify-content: center;
     margin: 35px 0px 0px 40px;
     padding-bottom: 20px;
     padding-right: 100px;
-    /* margin-left: 40px;
-    margin-top: 35px; */
-    /* transition: margin-left ease-in-out 200ms; */
 }
 .header-row{
     width: calc(100% - 108px);
-    /* max-width: 100%; */
-    /* width: calc(var(--task-row-width) - var(--task-btns-width)); */
 }
 .header-row .space-icon.emoji{
     font-size: 4rem;
     margin-bottom: 5px;
 }
 .space-header{
-    /* width: calc(var(--task-row-width) - var(--task-btns-width)); */
     font-size: 1.5rem;
     font-weight: 600;
     padding-bottom: 10px;
@@ -267,16 +254,12 @@ justify-content: center;
 }
 .task-name{
     min-width: 90%;
-    /* width: var(--task-title-width); */
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 .task-row{
     width: 100%;
-    /* min-width: 80%; */
-    /* min-width: calc(var(--task-title-width + --task-btns-width + 100px)); */
-    /* width: var(--task-row-width); */
     height: 47px;
     display: flex;
     align-items: center;
@@ -298,14 +281,8 @@ justify-content: center;
     height: 1px;
     background-color: var(--underline);
     border-bottom: 1.5px solid var(--underline);
-    /* border-bottom-length: 50px; */
 }
-/* .tasks-container .task-row:hover{
-    background-color: var(--grey-hover); 
-     border-radius: 15px;
-    border-top: 1.5px solid var(--underline);
-    border-bottom: 1.5px solid var(--underline);
-} */
+
 .task-row > div{
     display: flex;
     align-items: center;
@@ -375,7 +352,6 @@ justify-content: center;
     line-height: 1.3;
     padding: 20px;
     height: 250px;
-    /* border: 1px solid black; */
     border-radius: 15px;
     background-color: var(--accent-hover);
     overflow-y: scroll;
@@ -446,7 +422,6 @@ form legend {
 }
 .form-row{
     display: flex;
-    /* justify-content: space-between; */
     align-items: center;
     gap: 10px;
 }
@@ -466,6 +441,7 @@ button[class*="form-btn"]{
     border: none;
     width: 120px;
     padding: 8px 10px;
+    align-self: center;
 }
 button[class*="form-btn"]:hover{
     cursor: pointer;
@@ -481,7 +457,6 @@ form select{
     padding: 3px;
     border-bottom: 1.5px solid var(--accent-tint);
     outline: none;
-    /* border-radius: ; */
 }
 .notes-label{
     align-self: flex-start;
@@ -531,7 +506,6 @@ textarea{
 }
 .emoji{
     font-size: 1.5rem;
-    /* font-family: ; */
 }
 .task-priority.emoji{
     font-size: 1rem;
@@ -573,7 +547,6 @@ opacity: 1;
       .sidebar.open {
         position: fixed;
       }
-      
       .sidebar.open + .todo-container {
         visibility: hidden; 
       }
@@ -584,11 +557,7 @@ opacity: 1;
     .space-row .space-name, .space-row .space-name.active{
         width: 400px;
     }
-    /* .task-row  .btn.svg,
-    .space-row .btn.svg{
-        width: 25px;
-        height: 25px;
-    } */
+
     .sidebar:not(.open) + .todo-container {
         width: 100%;
         margin-left: calc(var(--sidebar-width) - 190px);
