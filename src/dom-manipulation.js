@@ -473,6 +473,7 @@ function toggleSidebar(){
 function updateOpenedSpaceStyle(){
     const spaceRows = document.querySelectorAll(".space-row");
     const openedSpaceId = getOpenedSpaceId();
+    console.log(openedSpaceId)
     spaceRows.forEach(spaceRow => {
         spaceRow.classList.remove("active");
         if (Number(spaceRow.dataset.id) === Number(openedSpaceId)){
@@ -482,5 +483,5 @@ function updateOpenedSpaceStyle(){
     )
 }
 
-export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasksInfo, deleteObjTasksFromSpace, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar}
+export {DOMdisplayDefaultSpace, DOMdisplayCustomSpace, DOMdisplayTaskRow, DOMdisplayTaskInfo, handleTaskDoneClick, deleteTask, deleteSpace, updateSpaceSelectOptions, DOMdisplayTasksInfo, deleteObjTasksFromSpace, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar, updateOpenedSpaceStyle}
 

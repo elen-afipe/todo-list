@@ -9,9 +9,9 @@ import { Picker } from 'emoji-picker-element';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 polyfillCountryFlagEmojis('Twemoji Mozilla');
-import {getOpenedSpaceId, getInfoMode, storageAvailable, saveToLocalStorage, getFromLocalStorage} from "./viewer-functions.js"
-import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, deleteTask, updateSpaceSelectOptions, DOMdisplayTasksInfo, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar} from "./dom-manipulation";
-import { createSpaceObject, editSpaceObj, getSpacesObj, addSpaceToSpaces, getCurrentSpaceId, initializeSpaceId} from "./spaces";
+import {getOpenedSpaceId, getInfoMode, storageAvailable, saveToLocalStorage, getFromLocalStorage, updateOpenedSpaceId} from "./viewer-functions.js"
+import { DOMdisplayCustomSpace, DOMdisplayDefaultSpace, deleteTask, updateSpaceSelectOptions, DOMdisplayTasksInfo, openAddSpaceForm, DOMdisplayCustomSpaces, openAddTaskForm, openEditTaskForm, toggleSidebar, updateOpenedSpaceStyle} from "./dom-manipulation";
+import { createSpaceObject, editSpaceObj, getSpacesObj, addSpaceToSpaces, initializeSpaceId} from "./spaces";
 import { createTaskObject, editTaskObj, getTasksObj, addTaskToTasks, initializeTaskId} from "./tasks";
 import {getTaskPrioritySymbols} from "./tasks.js"
 
@@ -20,7 +20,6 @@ initializeTaskId();
 let openedSpaceId = getOpenedSpaceId();
 const body = document.querySelector("body");
 
-// localStorage.clear();
 // navigation
 const nav = document.createElement("nav");
 nav.classList.add("navigation");
@@ -444,6 +443,7 @@ spaceDialog.classList.add("space-form");
         }
         
         DOMdisplayCustomSpaces();
+        updateOpenedSpaceStyle();
         updateSpaceSelectOptions();
         const spaces = getSpacesObj();
         saveToLocalStorage("spaces", spaces, true);
@@ -478,8 +478,10 @@ spaceDialog.classList.add("space-form");
                 addTaskToTasks(task)
               });
               openedSpaceId = savedOpenedSpaceId;
+              const syntheticEvent = { preventDefault: () => {} };
+              updateOpenedSpaceId(syntheticEvent, openedSpaceId)
               updateSpaceSelectOptions();
-
+              updateOpenedSpaceStyle();
               const sidebarClasslist = getFromLocalStorage("sidebar-state", false)
               if (sidebarClasslist.includes("open")){
                 sidebar.classList.add("open")
@@ -521,15 +523,17 @@ spaceDialog.classList.add("space-form");
         const tasks = getTasksObj();
         saveToLocalStorage("tasks", tasks, true);
     
-        const openedSpaceId = getOpenedSpaceId();
+        openedSpaceId = getOpenedSpaceId();
         saveToLocalStorage("current-space", openedSpaceId, false);
         saveToLocalStorage("sidebar-state", sidebar.classList, false)
         updateSpaceSelectOptions();
+        updateOpenedSpaceStyle();
         }
     }
 
 document.addEventListener('DOMContentLoaded', (e)=>{  
 DOMdisplayTasksInfo(e, openedSpaceId);
 })
+
 
 export {filteredSpaces, customSpaces, tasksContainer, taskCardElements, taskSpaceSelect, spaceDialog, spaceFormLegend, spaceFormBtn, spaceTitleInput, spaceIconInput, spaceForm, taskDialog, taskForm, taskFormLegend, taskFormBtn, taskTitleInput, taskDateInput, taskPrioritySelect, taskDescInput, tasksCounterContainer, sidebar, spaceIcon, spaceHeader}

@@ -18,9 +18,11 @@ function getOpenedSpaceId(){
 }
 
 function updateOpenedSpaceId(e, idOfNotOpenedSpace = false){
-  let clickedSpaceId = getObjectId(e);
+  let clickedSpaceId;
   if (idOfNotOpenedSpace !== false){
     clickedSpaceId = idOfNotOpenedSpace;
+  } else {
+    clickedSpaceId = getObjectId(e);
   }
   openedSpaceId = clickedSpaceId;
   saveToLocalStorage("current-space", openedSpaceId, false)
