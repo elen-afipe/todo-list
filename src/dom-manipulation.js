@@ -61,11 +61,17 @@ function DOMdisplayCustomSpace(spaceObj, container){
     deleteSpaceBtn.ariaLabel="Delete Space";
     deleteSpaceBtn.title = "Delete Space";
     deleteSpaceBtn.addEventListener("click", (e)=>{
+        const spaceToDeleteId = getObjectId(e);
+        const openedSpaceId = getOpenedSpaceId();
         deleteSpace(e); 
         const spaces = getSpacesObj();
         deleteObjTasksFromSpace(e);
-        DOMdisplayTasksInfo(e, 1);
-        updateOpenedSpaceId(e, 1);
+        if(Number(spaceToDeleteId) === Number(openedSpaceId)){
+            DOMdisplayTasksInfo(e, 1);
+            updateOpenedSpaceId(e, 1);
+        } else{
+            DOMdisplayTasksInfo(e, openedSpaceId);
+        }
         updateOpenedSpaceStyle();
         const tasks = getTasksObj();
         saveToLocalStorage("spaces", spaces, true);
@@ -473,7 +479,6 @@ function toggleSidebar(){
 function updateOpenedSpaceStyle(){
     const spaceRows = document.querySelectorAll(".space-row");
     const openedSpaceId = getOpenedSpaceId();
-    console.log(openedSpaceId)
     spaceRows.forEach(spaceRow => {
         spaceRow.classList.remove("active");
         if (Number(spaceRow.dataset.id) === Number(openedSpaceId)){
