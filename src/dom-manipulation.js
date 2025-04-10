@@ -65,7 +65,8 @@ function DOMdisplayCustomSpace(spaceObj, container){
         const spaces = getSpacesObj();
         deleteObjTasksFromSpace(e);
         DOMdisplayTasksInfo(e, 1);
-        updateOpenedSpaceId(e, 1)
+        updateOpenedSpaceId(e, 1);
+        updateOpenedSpaceStyle();
         const tasks = getTasksObj();
         saveToLocalStorage("spaces", spaces, true);
         saveToLocalStorage("tasks", tasks, true);
